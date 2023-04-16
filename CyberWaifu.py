@@ -218,6 +218,8 @@ if __name__ == "__main__":
 
     # 检查历史记录
     clear = False
+    if not os.path.exists(record_path):
+        os.mkdir(record_path)
     record_path += char_name + '.json'
     if os.path.exists(record_path):
         print(colored('检查到历史记录存在，是否继续使用？(y/n)', 'green'),)
@@ -234,6 +236,10 @@ if __name__ == "__main__":
                         print(item['content'])
         elif load_record == 'n':
             os.remove(record_path)
+
+    if not os.path.exists(record_path):
+        name = input(f'给{char_list[charactor]}取一个名字吧:')
+        system_prompt += 'Your name is ' + name + '.'
 
     gpt = ChatBot(api_key=api_info['openai_key'],
                   setting=system_prompt,
