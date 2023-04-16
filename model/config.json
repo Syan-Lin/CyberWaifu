@@ -1,0 +1,170 @@
+{
+    "momoi": {
+		"name_zh": "才羽桃井",
+		"sid": 10,
+		"language": "Japanese",
+        "describe": "元气、幼龄"
+    },
+    "iroha": {
+		"name_zh": "枣伊吕波",
+		"sid": 10,
+		"language": "Japanese",
+        "describe": "正常"
+    },
+    "mika": {
+		"name_zh": "圣园未花",
+		"sid": 10,
+		"language": "Japanese",
+        "describe": "元气、少女"
+    },
+    "miyu": {
+		"name_zh": "霞泽美游",
+		"sid": 10,
+		"language": "Japanese",
+		"describe": "羞答答幼龄"
+    },
+    "azusa": {
+		"name_zh": "白洲梓",
+		"sid": 10,
+		"language": "Japanese",
+		"describe": "正常"
+    },
+    "alice": {
+		"name_zh": "天童爱丽丝",
+		"sid": 10,
+		"language": "Japanese",
+		"describe": "可爱"
+    },
+    "shiroko": {
+		"name_zh": "砂狼白子",
+		"sid": 10,
+		"language": "Japanese",
+		"describe": "沉闷、磁性"
+    },
+    "hina": {
+		"name_zh": "空崎日奈",
+		"sid": 10,
+		"language": "Japanese",
+		"describe": "沉闷"
+    },
+    "izuna": {
+		"name_zh": "久田泉奈",
+		"sid": 10,
+		"language": "Japanese",
+		"describe": "超活力、幼龄"
+    },
+    "yuuka": {
+		"name_zh": "早濑优香",
+		"sid": 40,
+		"language": "Japanese",
+		"describe": "中性"
+    },
+    "ayaka-jp": {
+		"name_zh": "神里绫华",
+		"sid": 303,
+		"language": "Japanese",
+		"describe": "温柔御姐"
+    },
+	"pecorine": {
+		"name_zh": "佩可莉姆",
+		"sid": 10,
+		"language": "Japanese",
+		"describe": "可爱少女"
+    },
+	"hatsune": {
+		"name_zh": "柏崎初音",
+		"sid": 10,
+		"language": "Japanese",
+		"describe": "可爱少女"
+    },
+	"ameth": {
+		"name_zh": "爱梅斯",
+		"sid": 0,
+		"language": "Japanese",
+		"describe": "温柔少女"
+    },
+	"hiyori": {
+		"name_zh": "日和莉",
+		"sid": 0,
+		"language": "Japanese",
+		"describe": "活力少女"
+    },
+	"kyoka": {
+		"name_zh": "镜华",
+		"sid": 0,
+		"language": "Japanese",
+		"describe": "萝莉"
+    },
+    "eula": {
+		"name_zh": "优菈",
+		"sid": 124,
+		"language": "Chinese",
+		"describe": "英气"
+    },
+    "keqing": {
+		"name_zh": "刻晴",
+		"sid": 115,
+		"language": "Chinese",
+		"describe": "英气"
+    },
+    "bronya": {
+		"name_zh": "理之律者",
+		"sid": 193,
+		"language": "Chinese",
+		"describe": "沉闷"
+    },
+	"theresa": {
+		"name_zh": "德丽莎",
+		"sid": 193,
+		"language": "Chinese",
+		"describe": "少女"
+    },
+	"zh-CN-XiaoxiaoNeural": {
+		"name_zh": "晓晓",
+		"sid": -1,
+		"language": "Chinese",
+		"describe": "知性"
+    },
+	"zh-CN-XiaoyiNeural": {
+		"name_zh": "小艺",
+		"sid": -1,
+		"language": "Chinese",
+		"describe": "少女"
+    },
+	"zh-CN-XiaoshuangNeural": {
+		"name_zh": "小双",
+		"sid": -1,
+		"language": "Chinese",
+		"describe": "萝莉"
+    },
+	"zh-CN-XiaozhenNeural": {
+		"name_zh": "小贞",
+		"sid": -1,
+		"language": "Chinese",
+		"describe": "御姐"
+    },
+	"zh-CN-XiaohanNeural": {
+		"name_zh": "小涵",
+		"sid": -1,
+		"language": "Chinese",
+		"describe": "温柔"
+    },
+	"zh-CN-XiaomengNeural": {
+		"name_zh": "小梦",
+		"sid": -1,
+		"language": "Chinese",
+		"describe": "温柔"
+    },
+	"zh-CN-XiaomoNeural": {
+		"name_zh": "小莫",
+		"sid": -1,
+		"language": "Chinese",
+		"describe": "感性"
+    },
+	"zh-CN-XiaoyanNeural": {
+		"name_zh": "小妍",
+		"sid": -1,
+		"language": "Chinese",
+		"describe": "温柔"
+    }
+}

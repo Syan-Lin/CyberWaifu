@@ -1,0 +1,10 @@
+# 临时文件
+__pycache__
+.vscode
+output.wav
+
+# 模型文件
+*.pth
+
+# 隐私文件
+api.json
