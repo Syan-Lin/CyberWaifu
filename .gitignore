@@ -2,7 +2,7 @@
 __pycache__
 .vscode
 output.wav
-char_record
+chat_record
 
 # 模型文件
 *.pth

@@ -28,7 +28,7 @@ def get_input():
     # prompt for input
     print(">>>", end='')
     time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    user_input = input() + f'[系统信息: 当前时间({time})]'
+    user_input = input() + f'\n[系统时间: {time}]'
     sys.stdout.write('\r' + '信息正在飞快传往异次元...')
     sys.stdout.flush()
     return user_input
