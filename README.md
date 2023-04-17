@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 ### 运行
 
-填写 `api.json` 中的相关信息
+填写 `api.json` 中的相关信息，需要梯子
 
 ```powershell
 python CyberWaifu.py
