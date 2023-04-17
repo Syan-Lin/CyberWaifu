@@ -6,6 +6,7 @@ import utils
 import commons
 import sys
 import re
+import torch
 from torch import no_grad, LongTensor
 from winsound import PlaySound
 from ChatBot import ChatBot
@@ -17,6 +18,11 @@ from termcolor import colored
 from text.disclaimers import disc
 from azure_speech import playSoundWithAzure
 
+# gpu 加速
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if device.type == "cuda":
+    print("已开启GPU加速!")
+
 chinese_model_path = "./model/"
 chinese_config_path = "./model/cn_config.json"
 japanese_model_path = "./model/"
@@ -25,19 +31,12 @@ record_path = "./chat_record/"
 character_path = "./characters/"
 
 def get_input():
-    # prompt for input
     print(">>>", end='')
     time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     user_input = input() + f'\n[系统时间: {time}]'
     sys.stdout.write('\r' + '信息正在飞快传往异次元...')
     sys.stdout.flush()
     return user_input
-
-def ex_print(text, escape=False):
-    if escape:
-        print(text.encode('unicode_escape').decode())
-    else:
-        print(text)
 
 def get_text(text, hps, cleaned=False):
     if cleaned:
@@ -94,7 +93,7 @@ def generateSound(inputString, id, model_id):
         hps_ms.train.segment_size // hps_ms.data.hop_length,
         n_speakers=n_speakers,
         emotion_embedding=emotion_embedding,
-        **hps_ms.model)
+        **hps_ms.model).to(device)
     _ = net_g_ms.eval()
     utils.load_checkpoint(model, net_g_ms)
 
@@ -125,14 +124,12 @@ def generateSound(inputString, id, model_id):
                     out_path = "output.wav"
 
                     with no_grad():
-                        x_tst = stn_tst.unsqueeze(0)
-                        x_tst_lengths = LongTensor([stn_tst.size(0)])
-                        sid = LongTensor([speaker_id])
+                        x_tst = stn_tst.unsqueeze(0).to(device)
+                        x_tst_lengths = LongTensor([stn_tst.size(0)]).to(device)
+                        sid = LongTensor([speaker_id]).to(device)
                         audio = net_g_ms.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=noise_scale,
                                                noise_scale_w=noise_scale_w, length_scale=length_scale)[0][0, 0].data.cpu().float().numpy()
-
                 write(out_path, hps_ms.data.sampling_rate, audio)
-                # print('Successfully saved!')
 
 if __name__ == "__main__":
     # Check
@@ -236,9 +233,8 @@ if __name__ == "__main__":
                         print(item['content'])
         elif load_record == 'n':
             os.remove(record_path)
-
     if not os.path.exists(record_path):
-        name = input(f'给{char_list[charactor]}取一个名字吧:')
+        name = input(f'给{char_list[charactor]}取一个名字吧: ')
         system_prompt += 'Your name is ' + name + '.'
 
     gpt = ChatBot(api_key=api_info['openai_key'],
