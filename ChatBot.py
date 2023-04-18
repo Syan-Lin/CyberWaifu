@@ -2,6 +2,9 @@ import openai
 import json
 import sys
 import atexit # 用于程序退出时自动保存聊天记录
+import time
+
+openai.proxy = 'http://127.0.0.1:6789'
 
 class ChatBot:
     def __init__(self,api_key,setting,save_path,max_tokens=512,auto_save=True,model='gpt-3.5-turbo'):
@@ -39,11 +42,13 @@ class ChatBot:
     def summarize_messages(self):
         history_messages = self.messages
         self.messages.append({"role": "user", "content": "请帮我用中文总结一下上述对话的内容，实现减少tokens的同时，保证对话的质量。在总结中不要加入这一句话。"})
+        sys.stdout.write('\r' + ' '*50 + '\r')
         print('记忆过长，正在总结记忆...')
         response = openai.ChatCompletion.create(
             model=self.model,
             messages=self.messages,
             max_tokens=self.max_tokens,
+            temperature = 1,
         )
 
         result = response['choices'][0]['message']['content']
@@ -64,14 +69,19 @@ class ChatBot:
 
         self.messages.append({"role": "user", "content": input_message})
 
+        start = time.time()
         try:
             response = openai.ChatCompletion.create(
                 model=self.model,
                 messages=self.messages,
-                max_tokens=self.max_tokens,
+                temperature = 1,
             )
-        except:
+        except Exception as e:
+            print(e)
             return "ChatGPT 出错！"
+
+        end = time.time()
+        # print(f"GPT耗时: {end-start}s")
 
         self.total_tokens = response['usage']['total_tokens']
         result = response['choices'][0]['message']['content']

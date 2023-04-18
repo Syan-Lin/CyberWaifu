@@ -93,7 +93,7 @@ def generateSound(inputString, id, model_id):
         hps_ms.train.segment_size // hps_ms.data.hop_length,
         n_speakers=n_speakers,
         emotion_embedding=emotion_embedding,
-        **hps_ms.model).to(device)
+        **hps_ms.model)
     _ = net_g_ms.eval()
     utils.load_checkpoint(model, net_g_ms)
 
@@ -124,9 +124,16 @@ def generateSound(inputString, id, model_id):
                     out_path = "output.wav"
 
                     with no_grad():
-                        x_tst = stn_tst.unsqueeze(0).to(device)
-                        x_tst_lengths = LongTensor([stn_tst.size(0)]).to(device)
-                        sid = LongTensor([speaker_id]).to(device)
+                        x_tst = stn_tst.unsqueeze(0)
+                        x_tst_lengths = LongTensor([stn_tst.size(0)])
+                        sid = LongTensor([speaker_id])
+
+                        # GPU 加速
+                        x_tst = x_tst.to(device)
+                        x_tst_lengths = x_tst_lengths.to(device)
+                        sid = sid.to(device)
+                        net_g_ms = net_g_ms.to(device)
+
                         audio = net_g_ms.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=noise_scale,
                                                noise_scale_w=noise_scale_w, length_scale=length_scale)[0][0, 0].data.cpu().float().numpy()
                 write(out_path, hps_ms.data.sampling_rate, audio)
@@ -149,16 +156,28 @@ if __name__ == "__main__":
         input()
         sys.exit(1)
 
-    disc()
+    # disc()
     print('=========================')
     print('ID\t输出语言\n0\t汉语\n1\t日语')
-    model_id = int(input('选择语音语言: '))
+    chose = ''
+    while True:
+        chose = input('选择输出语言: ')
+        if chose == '0' or chose == '1':
+            break
+        else:
+            print(colored('错误: 请输入 0 或 1', 'red'))
+    model_id = int(chose)
 
     # 获取人设
     print('=========================')
     char_json = None
-    with open("characters/config.json", "r", encoding="utf-8") as f:
-        char_json = json.load(f)
+    try:
+        with open("characters/config.json", "r", encoding="utf-8") as f:
+            char_json = json.load(f)
+    except:
+        print(colored('错误: 人设配置加载错误，请检查文件格式是否正确（不要出现中文标点符号）', 'red'))
+        input()
+        exit()
     print('ID\t人设')
     char_list = list(char_json.keys())
     for i, char in enumerate(char_list):
@@ -166,7 +185,18 @@ if __name__ == "__main__":
             print(colored(f'{i}\t{char}', 'red'))
         else:
             print(f'{i}\t{char}')
-    charactor = int(input('选择人设: '))
+    chose = ''
+    while True:
+        chose = input('选择人设: ')
+        try:
+            num = int(chose)
+            if num >= 0 and num < len(char_list):
+                break
+            else:
+                raise ValueError()
+        except:
+            print(colored('错误: 请输入范围内的数字', 'red'))
+    charactor = int(chose)
     char_name = char_json[char_list[charactor]]
     char_path = './characters/' + char_name + '.txt'
 
@@ -204,7 +234,18 @@ if __name__ == "__main__":
                 print(str(i) + '\t' + info['name_zh'] + '(' + info['describe'] + ')')
             i = i + 1
     print('=========================')
-    voice = int(input('选择声线: '))
+    chose = ''
+    while True:
+        chose = input('选择声线: ')
+        try:
+            num = int(chose)
+            if num >= 0 and num < len(key_list):
+                break
+            else:
+                raise ValueError()
+        except:
+            print(colored('错误: 请输入范围内的数字', 'red'))
+    voice = int(chose)
     key = key_list[voice]
 
     if model_id == 0:
@@ -221,7 +262,9 @@ if __name__ == "__main__":
     if os.path.exists(record_path):
         print(colored('检查到历史记录存在，是否继续使用？(y/n)', 'green'),)
         load_record = input('>>>')
-        if load_record == 'y':
+        if load_record == 'n':
+            os.remove(record_path)
+        else:
             os.system('cls')
             clear = True
             with open(record_path, 'r', encoding='utf-8') as f:
@@ -231,8 +274,6 @@ if __name__ == "__main__":
                         print('>>>' + item['content'])
                     elif item['role'] == 'assistant':
                         print(item['content'])
-        elif load_record == 'n':
-            os.remove(record_path)
     if not os.path.exists(record_path):
         name = input(f'给{char_list[charactor]}取一个名字吧: ')
         system_prompt += 'Your name is ' + name + '.'

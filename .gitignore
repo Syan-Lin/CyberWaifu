@@ -3,9 +3,14 @@ __pycache__
 .vscode
 output.wav
 chat_record/*.json
+test.py
 
 # 模型文件
 *.pth
+Azue Lane(JP)
 
 # 隐私文件
 api.json
+
+# 暂时未上传
+CyberWaifu_WebUI

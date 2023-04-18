@@ -1,0 +1,129 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>CyberWaifu</title>
+    <!-- Bootstrap core -->
+    <link href={% static 'plugins/css/bootstrap.min.css' %} rel="stylesheet">
+    <link href={% static 'css/custom.css' %} rel="stylesheet">
+    <script src={% static 'plugins/js/bootstrap.bundle.min.js' %}></script>
+    <script type="text/javascript" src={% static 'plugins/js/jquery-3.6.4.min.js' %}></script>
+    <script src={% static 'js/custom.js' %}></script>
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar bg-dark navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">CyberWaifu</a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active text-info" aria-current="page" href="#" style="font-weight: bold;">主页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="#" style="font-weight: bold;">设置</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="#" style="font-weight: bold;">关于</a>
+                    </li>
+                </ul>
+                <button class="btn btn-outline-light" type="submit">加入交流群</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page Content -->
+    <div class="container card search-bar" style="width:90vw">
+        <div class="card-body row g-3">
+            <form class="d-flex" role="search">
+                <div class="search col-sm-2">
+                    选择语言：
+                    <select id="language" class="form-select" name="language">
+                        <option value="1">汉语</option>
+                        <option value="2">日语</option>
+                    </select>
+                </div>
+                <div class="search col-sm-2">
+                    选择人设：
+                    <select id="character" class="form-select" name="character">
+                        {% for character in characters %}
+                        <option value="{{ forloop.counter0 }}">{{ character }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="search col-sm-2">
+                    选择声线：
+                    <select id="voice" class="form-select" name="voice">
+                    </select>
+                </div>
+                <div class="search col-sm-2" style="margin-top:20px;">
+                    <button type="submit" class="btn btn-primary">加载历史记忆</button>
+                </div>
+                <div class="search col-sm-1" style="margin-top:20px;">
+                    <button type="submit" class="btn btn-primary">启动</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="container" style="margin-top: 10px;margin-bottom: 20px;">
+            选择 Live 2D
+            <div class="form-group">
+                <select class="selectCharacter form-control"></select>
+            </div>
+            <div class="selectAnimation btn-group" role="group" aria-label="Animation" style="display: flex; flex-wrap: wrap;"></div>
+        </div>
+    </div>
+    <script>
+        // 更新声线列表
+        function updateVoice(options) {
+            var voice = document.getElementById("voice");
+            voice.innerHTML = '';
+            for (var i = 0; i < options.length; i++) {
+                var option = document.createElement('option');
+                option.value = i + 1;
+                option.text = options[i];
+                voice.add(option);
+            }
+        }
+
+        // 监听语言选择
+        var lang = document.getElementById("language");
+        lang.addEventListener("change", function() {
+            var selectedValue = this.value;
+            // 根据所选值获取需要更新的选项
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    var response = JSON.parse(this.responseText);
+                    updateVoice(response);
+                }
+            };
+            xhr.open("GET", "/voice/?value=" + selectedValue);
+            xhr.send();
+        });
+        var event = new Event('change');
+        lang.dispatchEvent(event);
+    </script>
+    <!-- Canvas -->
+    <div class="Canvas left"></div>
+
+    <!-- Live2DCubismCore -->
+    <script src={% static 'plugins/js/live2dcubismcore.min.js' %}></script>
+
+    <!-- Include Pixi. -->
+    <script src={% static 'plugins/js/pixi.min.js' %}></script>
+
+    <!-- Include Cubism Components. -->
+    <script src={% static 'plugins/js/live2dcubismframework.js' %}></script>
+    <script src={% static 'plugins/js/live2dcubismpixi.js' %}></script>
+
+    <!-- User's Script -->
+    <script src={% static 'plugins/js/charData.js' %}></script>
+    <script src={% static 'plugins/js/l2d.js' %}></script>
+    <script src={% static 'plugins/js/main.js' %}></script>
+</body>
