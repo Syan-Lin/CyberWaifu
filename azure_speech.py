@@ -2,13 +2,13 @@ import azure.cognitiveservices.speech as speechsdk
 import json
 from termcolor import colored
 import random
+import configparser
 
 def playSoundWithAzure(role, text):
-    api_info = None
-    with open("api.json", "r", encoding="utf-8") as f:
-        api_info = json.load(f)
+    config = configparser.ConfigParser()
+    config.read('config.ini', encoding='utf-8')
 
-    if api_info['azure_speech_key'] == '' or api_info['azure_region'] == '':
+    if config.get('API', 'azure_speech_key') == '' or config.get('API', 'azure_region') == '':
         print(colored('错误: 未配置 Azure API!', 'red'))
         return
 
@@ -31,7 +31,7 @@ def playSoundWithAzure(role, text):
 
     # print(ssml)
 
-    speech_key, service_region = api_info['azure_speech_key'], api_info['azure_region']
+    speech_key, service_region = config.get('API', 'azure_speech_key'), config.get('API', 'azure_region')
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
