@@ -15,8 +15,9 @@ from tools import *
 import os
 import datetime
 from termcolor import colored
-from text.disclaimers import disc
 from azure_speech import playSoundWithAzure
+import configparser
+import Config
 
 # gpu 加速
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -139,120 +140,19 @@ def generateSound(inputString, id, model_id):
                 write(out_path, hps_ms.data.sampling_rate, audio)
 
 if __name__ == "__main__":
-    # Check
-    api_info = None
-    with open("api.json", "r", encoding="utf-8") as f:
-        api_info = json.load(f)
-    if api_info['openai_key'] == '':
-        print(colored('错误: 请在 api.json 中填写 openai api key', 'red'))
-        input()
-        sys.exit(1)
-    elif api_info['baidu_appid'] == '':
-        print(colored('错误: 请在 api.json 中填写百度翻译 API 的 appid', 'red'))
-        input()
-        sys.exit(1)
-    elif api_info['baidu_secretKey'] == '':
-        print(colored('错误: 请在 api.json 中填写百度翻译 API 的 secretKey', 'red'))
-        input()
-        sys.exit(1)
+    # 读取配置文件
+    config = configparser.ConfigParser()
+    config.read('config.ini', encoding='utf-8')
 
-    # disc()
-    print('=========================')
-    print('ID\t输出语言\n0\t汉语\n1\t日语')
-    chose = ''
-    while True:
-        chose = input('选择输出语言: ')
-        if chose == '0' or chose == '1':
-            break
-        else:
-            print(colored('错误: 请输入 0 或 1', 'red'))
-    model_id = int(chose)
-
-    # 获取人设
-    print('=========================')
-    char_json = None
-    try:
-        with open("characters/config.json", "r", encoding="utf-8") as f:
-            char_json = json.load(f)
-    except:
-        print(colored('错误: 人设配置加载错误，请检查文件格式是否正确（不要出现中文标点符号）', 'red'))
-        input()
-        exit()
-    print('ID\t人设')
-    char_list = list(char_json.keys())
-    for i, char in enumerate(char_list):
-        if '18' in char:
-            print(colored(f'{i}\t{char}', 'red'))
-        else:
-            print(f'{i}\t{char}')
-    chose = ''
-    while True:
-        chose = input('选择人设: ')
-        try:
-            num = int(chose)
-            if num >= 0 and num < len(char_list):
-                break
-            else:
-                raise ValueError()
-        except:
-            print(colored('错误: 请输入范围内的数字', 'red'))
-    charactor = int(chose)
-    char_name = char_json[char_list[charactor]]
-    char_path = './characters/' + char_name + '.txt'
-
-    system_prompt = ''
-    try:
-        with open(char_path, "r", encoding="utf-8") as f:
-            system_prompt = f.read()
-        print(colored('人设加载成功！', 'green'))
-    except:
-        print(colored(f'人设文件: {char_path} 不存在', 'red'))
-
-    # 获取模型地址
-    print('=========================')
-    print(colored('注意：黄色声线需要配置 Azure API', 'yellow'))
-    print('ID\t声线')
-    model_info = None
-    with open("model/config.json", "r", encoding="utf-8") as f:
-        model_info = json.load(f)
-
-    i = 0
-    key_list = []
-    for key, info in model_info.items():
-        if model_id == 0 and info['language'] == 'Chinese':
-            key_list.append(key)
-            if 'zh-CN' in key:
-                print(colored(str(i) + '\t' + info['name_zh'] + '(' + info['describe'] + ')', 'yellow'))
-            else:
-                print(str(i) + '\t' + info['name_zh'] + '(' + info['describe'] + ')')
-            i = i + 1
-        elif model_id == 1 and info['language'] == 'Japanese':
-            key_list.append(key)
-            if 'zh-CN' in key:
-                print(colored(str(i) + '\t' + info['name_zh'] + '(' + info['describe'] + ')', 'yellow'))
-            else:
-                print(str(i) + '\t' + info['name_zh'] + '(' + info['describe'] + ')')
-            i = i + 1
-    print('=========================')
-    chose = ''
-    while True:
-        chose = input('选择声线: ')
-        try:
-            num = int(chose)
-            if num >= 0 and num < len(key_list):
-                break
-            else:
-                raise ValueError()
-        except:
-            print(colored('错误: 请输入范围内的数字', 'red'))
-    voice = int(chose)
-    key = key_list[voice]
+    Config.checkApi(config)
+    model_id = Config.choseLang(config)
+    system_prompt, char_name = Config.choseChar()
+    id, key = Config.getModel(model_id)
 
     if model_id == 0:
         chinese_model_path += key + '/' + key + '.pth'
     elif model_id == 1:
         japanese_model_path += key + '/' + key + '.pth'
-    id = model_info[key]['sid']
 
     # 检查历史记录
     clear = False
@@ -275,10 +175,10 @@ if __name__ == "__main__":
                     elif item['role'] == 'assistant':
                         print(item['content'])
     if not os.path.exists(record_path):
-        name = input(f'给{char_list[charactor]}取一个名字吧: ')
+        name = input(f'给{char_name}取一个名字吧: ')
         system_prompt += 'Your name is ' + name + '.'
 
-    gpt = ChatBot(api_key=api_info['openai_key'],
+    gpt = ChatBot(api_key=config.get('API', 'openai_key'),
                   setting=system_prompt,
                   save_path=record_path)
 
@@ -299,7 +199,7 @@ if __name__ == "__main__":
                 PlaySound(r'.\output.wav', flags=1)
         elif model_id == 1:
             answer = gpt.send_message(get_input()).replace('\n','')
-            trans = translate_baidu(brackets_delete(answer), api_info['baidu_appid'], api_info['baidu_secretKey'])
+            trans = translate_baidu(brackets_delete(answer), config.get('API', 'baidu_appid'), config.get('API', 'baidu_secretKey'))
             if trans == None:
                 print(colored('错误: 翻译 API 错误！', 'red'))
             generateSound(brackets_delete(trans), id, model_id)

@@ -4,8 +4,6 @@ import sys
 import atexit # 用于程序退出时自动保存聊天记录
 import time
 
-openai.proxy = 'http://127.0.0.1:6789'
-
 class ChatBot:
     def __init__(self,api_key,setting,save_path,max_tokens=512,auto_save=True,model='gpt-3.5-turbo'):
         self.api_key = api_key
