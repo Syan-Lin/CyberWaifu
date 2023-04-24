@@ -55,7 +55,6 @@ def load_model(model_id):
     print(colored('语音模型加载成功！', 'green'))
 
 def get_text(text, cleaned=False):
-    global n_symbols
     global emotion_embedding
     global hps_ms
     global net_g_ms

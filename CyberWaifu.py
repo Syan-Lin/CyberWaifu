@@ -91,7 +91,7 @@ if __name__ == "__main__":
                 print(answer, flush=True)
                 playSoundWithAzure(key, brackets_delete(answer))
             else:
-                generateSound(brackets_delete(answer), id)
+                generateSound('[ZH]' + brackets_delete(answer) + '[ZH]', id)
                 sys.stdout.write('\r' + ' '*50 + '\r')
                 print(answer, flush=True)
                 PlaySound(r'.\output.wav', flags=1)
