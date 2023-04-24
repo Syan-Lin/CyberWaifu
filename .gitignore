@@ -4,6 +4,7 @@ __pycache__
 output.wav
 chat_record/*.json
 test.py
+talk_self.py
 
 # 模型文件
 *.pth

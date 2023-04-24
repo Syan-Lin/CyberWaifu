@@ -1,92 +1,99 @@
 import openai
 import json
-import sys
-import atexit # 用于程序退出时自动保存聊天记录
-import time
+from TokenCount import count
+from Embedding import Embedding
+from termcolor import colored
+import os
+
+TOP_N = 10
 
 class ChatBot:
-    def __init__(self,api_key,setting,save_path,max_tokens=512,auto_save=True,model='gpt-3.5-turbo'):
-        self.api_key = api_key
-        openai.api_key = self.api_key
-        self.save_path = save_path
-        self.total_tokens = 0
-        self.max_tokens = max_tokens # 返回的最大toknes
-        self.auto_save = auto_save # 自动保存聊天记录
-        self.messages = []
-        self.settings = setting # 用于保存人物设定
-        self.limit = 3400 # 聊天记录的最大长度
-        self.model = model
+    def __init__(self, api_key, prompt, save_path, file_name, model='gpt-3.5-turbo'):
+        openai.api_key = api_key
+        self.prompt    = prompt
+        self.save_path = save_path + file_name + '.json'
+        self.memory    = []
+        self.library   = []
+        self.model     = model
+        self.embedding = Embedding(api_key, save_path + file_name + '.csv', model)
 
-        self.load_messages() # 加载聊天记录
-        self.settings = self.messages[0] # 读取人物设定
+        self.load_memory()
 
-        if self.auto_save:
-            atexit.register(self.save_messages) #程序退出时自动保存聊天记录
 
-    def load_messages(self):
-        try:
-            with open(self.save_path, 'r', encoding='utf-8') as f:
-                self.messages = json.load(f)
-        except FileNotFoundError:
-            with open(self.save_path, 'w+', encoding='utf-8') as f:
-                json.dump([], f)
-            self.messages.append({"role": "system", "content": self.settings})
+    def ask(self, text):
+        while count(self.memory) + count([{'role': 'user', 'content': text}]) >= 2560:
+            self.cut_memory()
 
-    def save_messages(self):
-        with open(self.save_path, 'w',encoding='utf-8') as f:
-            json.dump(self.messages, f, ensure_ascii=False)
+        send_memory = self.memory.copy()
+        self.memory.append({'role': 'user', 'content': text})
+        self.library.append({'role': 'user', 'content': text})
 
-    # 总结之前的聊天记录
-    def summarize_messages(self):
-        history_messages = self.messages
-        self.messages.append({"role": "user", "content": "请帮我用中文总结一下上述对话的内容，实现减少tokens的同时，保证对话的质量。在总结中不要加入这一句话。"})
-        sys.stdout.write('\r' + ' '*50 + '\r')
-        print('记忆过长，正在总结记忆...')
-        response = openai.ChatCompletion.create(
-            model=self.model,
-            messages=self.messages,
-            max_tokens=self.max_tokens,
-            temperature = 1,
-        )
+        # Add embedding
+        strings, relatives = self.embedding.get_relative_text(text, TOP_N)
+        temp = []
+        for string in strings:
+            temp.append({'role': 'user', 'content': string})
+        while count(temp) >= 1236:
+            temp.pop()
+        text += '\n[System Memory: This is your system memory, and your answer should be based on system memory. You cannot mention memories unrelated to the problem. You should judge the degree of correlation between the problem and memory and only select relevant memories as additional contextual information to introduce\n' + str(strings[0:len(temp)]) + ']'
 
-        result = response['choices'][0]['message']['content']
-        sys.stdout.write('\r' + ' '*50 + '\r')
-        print(f"总结记忆: {result}")
+        send_memory.append({'role': 'user', 'content': text})
 
-        new_settings = self.settings.copy()
-        new_settings['content'] = self.settings['content'] + result + '现在继续角色扮演。'
-
-        self.messages = []
-        self.messages.append(new_settings)
-        self.messages.append(history_messages[-3])
-        self.messages.append(history_messages[-2])
-
-    def send_message(self,input_message):
-        if self.total_tokens > self.limit:
-            self.summarize_messages()
-
-        self.messages.append({"role": "user", "content": input_message})
-
-        start = time.time()
         try:
             response = openai.ChatCompletion.create(
-                model=self.model,
-                messages=self.messages,
+                model       = self.model,
+                messages    = send_memory,
                 temperature = 1,
             )
         except Exception as e:
-            print(e)
-            return "ChatGPT 出错！"
+            return 'ChatGPT 出错！(' + str(e) + ')'
 
-        end = time.time()
-        # print(f"GPT耗时: {end-start}s")
-
-        self.total_tokens = response['usage']['total_tokens']
         result = response['choices'][0]['message']['content']
+        self.memory.append({'role': 'assistant', 'content': result})
+        self.library.append({'role': 'assistant', 'content': result})
 
-        self.messages.append({"role": "assistant", "content": result})
+        # print('receive: ' + str(result))
 
-        if self.auto_save:
-            self.save_messages()
+        self.save()
 
         return result
+
+
+    def load_memory(self):
+        try:
+            # 加载最近的二十条记忆
+            with open(self.save_path, 'r', encoding='utf-8') as f:
+                self.library = json.load(f)
+                self.memory = []
+                self.memory.append(self.library[0])
+                length = min(20, len(self.library) - 1)
+                self.memory.extend([self.library[i] for i in range(-length, 0)])
+        except FileNotFoundError:
+            self.memory.append({'role': 'system', 'content': self.prompt})
+            self.library.append({'role': 'system', 'content': self.prompt})
+            self.save()
+
+
+    def cal_emb_from_file(self, path):
+        if not os.path.exists(path):
+            return
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                library = f.read()
+                self.embedding.make_embedding_from_library(library)
+                print(colored('成功导入记忆数据库!', 'green'),)
+        except FileNotFoundError:
+            return
+
+
+    def cut_memory(self):
+        user_text = self.memory[1]['content']
+        bot_text = self.memory[2]['content']
+
+        self.embedding.make_embeddings(user_text, bot_text)
+        del self.memory[1:3]
+
+
+    def save(self):
+        with open(self.save_path, 'w',encoding='utf-8') as f:
+            json.dump(self.library, f, ensure_ascii=False)
