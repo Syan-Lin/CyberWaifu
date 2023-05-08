@@ -1,0 +1,23 @@
+{
+    "images": [
+        {
+            "file_name": "1.png",
+            "description": "来表达亲近、友好"
+        },{
+            "file_name": "2.png",
+            "description": "来表达想念、思念"
+        },{
+            "file_name": "3.png",
+            "description": "来表达调皮、撒娇"
+        },{
+            "file_name": "4.png",
+            "description": "来表达委屈、难过"
+        },{
+            "file_name": "5.png",
+            "description": "来表达肯定、赞同"
+        },{
+            "file_name": "6.png",
+            "description": "来表达疑惑、困惑"
+        }
+    ]
+}

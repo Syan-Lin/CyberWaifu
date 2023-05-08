@@ -1,17 +1,23 @@
 # 临时文件
 __pycache__
 .vscode
-output.wav
-chat_record/*.json
+config.yml
+device.json
+session.token
+go-cqhttp.exe
 test.py
-talk_self.py
+chatgpt
+tts
 
 # 模型文件
 *.pth
-Azue Lane(JP)
 
 # 隐私文件
 config.ini
 
-# 暂时未上传
-CyberWaifu_WebUI
+# 日志
+cqLogs
+data
+download
+logs
+memory
