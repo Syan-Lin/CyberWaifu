@@ -1,5 +1,7 @@
 ![cover](assets/cover.jpg)
 
+---
+
 ### 介绍🔎
 
 CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实的聊天体验。
