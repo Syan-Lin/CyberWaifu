@@ -104,28 +104,3 @@ class Search():
         if len(answer) >= 256:
             answer = answer[0:256]
         return question, answer
-
-from langchain.chat_models import ChatOpenAI
-
-if __name__ == "__main__":
-    api_key = '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'
-    api = 'be6e04a065340e490a32cd9623151788e43422de'
-    llm_nonstream = ChatOpenAI(openai_api_key=api_key)
-    search = GoogleSerperAPIWrapper(serper_api_key=api, gl='cn', hl='zh-cn', k=10)
-    test = ['星穹铁道好好玩', '哈哈哈，你在干嘛呢？', '帮我查一下明天的青岛天气', '如何看待最近很火的孔乙己的长衫？', '推荐几个B站视频', '最近有什么好玩的事情']
-    for text in test:
-        # check = [
-        #     SystemMessage(content='''You need to reply to the information based on the user's input. If you feel the need for search engine assistance, especially when the user's input contains information that you do not know, such as certain nouns or real-time information that are not in your training data. If you need Google, answer "yes", otherwise answer "no"'''),
-        #     HumanMessage(content=f'Make a search decision for the following text:\n"{text}"')
-        # ]
-        # reply = llm_nonstream(check).content
-        # print(reply)
-        # if 'yes' in reply or 'Yes' in reply:
-        message = [
-            SystemMessage(content='You are a Chinese search keyword generator now for Google search. You need to generate only one keyword based on the given text for Google search. Response with only one search keyword.'),
-            HumanMessage(content=f'Make a Chinese search keyword for the following text:\n"{text}"')
-        ]
-        reply = llm_nonstream(message).content
-
-        print(f'question:{reply}')
-        print(f'answer:{search.run(reply)}')
