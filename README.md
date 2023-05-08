@@ -1,27 +1,22 @@
-# CyberWaifu
+![cover](assets/cover.jpg)
 
-### 项目介绍
+### 介绍🔎
 
-CyberWaifu 是一个使用 ChatGPT 和 Vits 语音合成的实时聊天系统，实现与 AI 老婆语音聊天的项目。
+CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实的聊天体验。
 
-该项目基于：
-1. [chatgpt-vits-waifu](https://github.com/Li-kaige/chatgpt-vits-waifu)
-2. [vits-models](https://huggingface.co/spaces/zomehwh/vits-models)
-
-有多音色选择和双语支持（日语和汉语），具有长对话自动总结和保存功能，让 AI 老婆具有长期记忆力，同时 AI 老婆可以感知时间的流逝，例如一天之后交流。
-
-支持自定义人设，默认自带了几个精心调教的预设人设。
+该项目使用 [LangChain](https://github.com/hwchase17/langchain) 作为 LLM 主体框架，使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 进行 QQ 机器人部署，TTS 支持 vits、[edge-tts](https://github.com/rany2/edge-tts)。
 
 ### 功能
 
-- [x] 双语语音回复
-- [x] 中文语音包（12 种声线）
-- [x] 日文语音包（14 种声线）
-- [x] 精心预设人设（对现实时间有感知，不同的时间有不同的反应）
-- [x] 自定义人设
-- [ ] 图形化界面
-- [ ] QQ/微信 部署
-- [ ] 服务器架设
+- [x] 预定义的思考链：使 AI 可以进行一定的逻辑思考，进行决策。例如在文本中添加 Emoji、发送表情包等等。
+- [x] 记忆数据库：自动总结对话内容并导入记忆数据库，根据用户的提问引入上下文，从而实现长时记忆。同时支持批量导入记忆，使人设更丰富、真实和可控。
+- [x] 现实感知：AI 可以感知现实的时间并模拟自己的状态和行为，例如晚上会在睡觉、用户隔很久回复会有相应反馈（这部分表现暂时不稳定）
+- [x] 联网搜索：根据用户的信息，自主构造搜索决策，并引入上下文。
+- [ ] vits 双语（中、日）多音色支持
+- [ ] emotion-vits 支持
+- [ ] bark 支持
+- [ ] QQ 机器人部署
+- [ ] 人设模板、自定义人设
 
 ### 安装
 
@@ -37,13 +32,3 @@ pip install -r requirements.txt
 ```
 
 ### 运行
-
-填写 `api.json` 中的相关信息，需要梯子
-
-```powershell
-python CyberWaifu.py
-```
-
-语言和语音包：
-- 日语需要配置百度翻译 API
-- 中文微软语言包需要配置 Azure 语音服务的 API
