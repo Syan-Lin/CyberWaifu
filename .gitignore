@@ -5,9 +5,9 @@ config.yml
 device.json
 session.token
 go-cqhttp.exe
+emoticon.json
 test.py
 chatgpt
-tts
 
 # 模型文件
 *.pth

@@ -10,7 +10,7 @@ class VectorDB:
         self.chunks    = []
 
 
-    def store(self, text):
+    def store(self, text: str | list):
         '''保存 vector'''
         if isinstance(text, str):
             vector = self.embedding.embed_documents([text])
@@ -23,7 +23,7 @@ class VectorDB:
         df.to_csv(self.save_path, mode='a', header=not os.path.exists(self.save_path), index=False)
 
 
-    def query(self, text, top_n):
+    def query(self, text: str, top_n: int):
         relatedness_fn=lambda x, y: 1 - spatial.distance.cosine(x, y)
 
         # Load embeddings data

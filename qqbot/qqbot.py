@@ -1,14 +1,13 @@
 from pycqBot.cqHttpApi import cqHttpApi, cqLog
 from pycqBot.data import Message
 from pycqBot.cqCode import image
+from waifu.Waifu import Waifu
 
 import os
 import sys
 import logging
 
-sys.stdout = open(os.devnull, 'w', encoding='utf-8')
-
-def make_qq_bot(callback, waifu):
+def make_qq_bot(callback, waifu: Waifu):
     cqLog(level=logging.INFO, logPath='./qqbot/cqLogs')
 
     cqapi = cqHttpApi(download_path='./qqbot/download')
@@ -45,5 +44,5 @@ def make_qq_bot(callback, waifu):
     #     ],
     #     "type": "all"
     # })
-
+    sys.stdout = open(os.devnull, 'w', encoding='utf-8')
     bot.start(go_cqhttp_path='./qqbot/')

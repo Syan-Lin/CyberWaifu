@@ -1,6 +1,7 @@
 import json
 import waifu.Thoughts
 from waifu.Tools import make_message, message_period_to_now
+from waifu.llm.Brain import Brain
 from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.chains.summarize import load_summarize_chain
 from langchain.docstore.document import Document
@@ -12,7 +13,14 @@ import logging
 class Waifu():
     '''CyberWaifu'''
 
-    def __init__(self, brain, prompt, name, use_search = False, search_api = '', use_emoji = True, use_emoticon = True):
+    def __init__(self,
+                 brain: Brain,
+                 prompt: str,
+                 name: str,
+                 use_search: bool = False,
+                 search_api: str = '',
+                 use_emoji: bool = True,
+                 use_emoticon: bool = True):
         self.brain = brain
         self.name = name
         self.charactor_prompt = SystemMessage(content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"')
@@ -30,7 +38,7 @@ class Waifu():
         self.load_memory()
 
 
-    def ask(self, text):
+    def ask(self, text: str):
         '''发送信息'''
         message = make_message(text)
         # 第一次检查用户输入文本是否过长
@@ -69,12 +77,13 @@ class Waifu():
             logging.debug(f'相关记忆:\n' + '\n'.join([str(elem) for elem in relative_memory]))
 
         # 事实搜索
-        question, answer = self.search.think(text)
-        if not answer == '':
-            logging.info(f'进行搜索:\nQuestion: {question}\nAnswer:{answer}')
-            fact_prompt = f'This following message is relative context searched in Google:\nQuestion:{question}\nAnswer:{answer}'
-            fact_message = SystemMessage(content=fact_prompt)
-            messages.append(fact_message)
+        if self.use_search:
+            question, answer = self.search.think(text)
+            if not answer == '':
+                logging.info(f'进行搜索:\nQuestion: {question}\nAnswer:{answer}')
+                fact_prompt = f'This following message is relative context searched in Google:\nQuestion:{question}\nAnswer:{answer}'
+                fact_message = SystemMessage(content=fact_prompt)
+                messages.append(fact_message)
 
         # 系统信息
         if len(self.chat_memory.messages) >= 2:
@@ -107,7 +116,7 @@ class Waifu():
         logging.info('结束回复')
 
 
-    def finish_ask(self, text):
+    def finish_ask(self, text: str):
         self.chat_memory.add_ai_message(text)
         self.history.add_ai_message(text)
         self.save_memory()
@@ -119,7 +128,7 @@ class Waifu():
             return ''
 
 
-    def add_emoji(self, text):
+    def add_emoji(self, text: str):
         if self.use_emoji:
             emoji = self.emoji.think(text)
             return emoji
@@ -127,13 +136,13 @@ class Waifu():
             return ''
 
 
-    def import_memory_dataset(self, text):
+    def import_memory_dataset(self, text: str):
         '''导入记忆数据库, text 是按换行符分块的长文本'''
         chunks = text.split('\n\n')
         self.brain.store_memory(chunks)
 
 
-    def save_memory_dataset(self, memory):
+    def save_memory_dataset(self, memory: str):
         '''保存至记忆数据库, memory 可以是文本列表, 也是可以是文本'''
         self.brain.store_memory(memory)
 

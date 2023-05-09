@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Union
 from langchain.schema import AgentAction, AgentFinish, LLMResult
 from waifu.Tools import get_first_sentence
 from pycqBot.cqCode import image
+from waifu.Waifu import Waifu
 import os
 import logging
 
@@ -12,7 +13,7 @@ class WaifuCallback(BaseCallbackHandler):
     def __init__(self):
         self.text = ''
 
-    def regitster(self, waifu):
+    def regitster(self, waifu: Waifu):
         self.waifu = waifu
 
     def set_sender(self, sender):
@@ -31,7 +32,7 @@ class WaifuCallback(BaseCallbackHandler):
         if not sentence == '':
             emoji = self.waifu.add_emoji(sentence)
             self.sender.send_message(f'{sentence}{emoji}')
-            logging.info(f'发送信息: {sentence}{emoji}')
+            logging.info(f'发送信息: {sentence}')
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         """Run when LLM ends running."""
