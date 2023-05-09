@@ -12,7 +12,7 @@ def make_qq_bot(callback, waifu: Waifu):
     cqapi = cqHttpApi(download_path='./qqbot/download')
 
     def on_private_msg(message: Message):
-        if 'CQ' in message.message and 'image' in message.message:
+        if 'CQ' in message.message:
             return
         callback.set_sender(message.sender)
         waifu.ask(message.message)

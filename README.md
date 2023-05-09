@@ -27,6 +27,8 @@ CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实�
 
 ✅ QQ 机器人部署
 
+✅ QQ 表情支持
+
 ✅ 人设模板、自定义人设
 
 ⬜ vits, emotion-vits 支持
@@ -37,7 +39,7 @@ CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实�
 
 ⬜ AI 绘图支持，将绘图引入思考链，使 AI 可以生成图片，例如 AI 自拍
 
-### 安装
+### 安装💻
 
 Python 版本：3.10.10
 
@@ -50,10 +52,10 @@ conda activate CyberWaifu
 pip install -r requirements.txt
 ```
 
-#### QQ 机器人部署：
+#### QQ 机器人部署
 根据 [go-cqhttp 下载文档](https://docs.go-cqhttp.org/guide/quick_start.html#%E4%B8%8B%E8%BD%BD)，下载相应平台的可执行程序，并放入 `qqbot` 目录中
 
-### 配置
+### 配置✏️
 
 按照 `template.ini` 进行配置，配置完成后改名为 `config.ini`
 

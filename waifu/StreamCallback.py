@@ -30,8 +30,7 @@ class WaifuCallback(BaseCallbackHandler):
         self.text += token
         sentence, self.text = get_first_sentence(self.text)
         if not sentence == '':
-            emoji = self.waifu.add_emoji(sentence)
-            self.sender.send_message(f'{sentence}{emoji}')
+            self.sender.send_message(self.waifu.add_emoji(sentence))
             logging.info(f'发送信息: {sentence}')
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:

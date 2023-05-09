@@ -1,6 +1,7 @@
 import json
 import os
 import waifu.Thoughts
+from pycqBot.cqCode import face
 from waifu.Tools import make_message, message_period_to_now
 from waifu.llm.Brain import Brain
 from langchain.schema import messages_from_dict, messages_to_dict
@@ -22,6 +23,7 @@ class Waifu():
                  use_search: bool = False,
                  search_api: str = '',
                  use_emoji: bool = True,
+                 use_qqface: bool = False,
                  use_emoticon: bool = True):
         self.brain = brain
         self.name = name
@@ -33,9 +35,11 @@ class Waifu():
         self.use_emoji = use_emoji
         self.use_emoticon = use_emoticon
         self.use_search = use_search
+        self.use_qqface = use_qqface
         self.emoji = waifu.Thoughts.AddEmoji(self.brain)
         self.emoticon = waifu.Thoughts.SendEmoticon(self.brain)
         self.search = waifu.Thoughts.Search(self.brain, search_api)
+        self.qqface = waifu.Thoughts.AddQQFace(self.brain)
 
         self.load_memory()
 
@@ -78,7 +82,7 @@ class Waifu():
             memory_message = SystemMessage(content=memory_prompt)
             messages.append(memory_message)
 
-            logging.debug(f'相关记忆:\n' + '\n'.join([str(elem) for elem in relative_memory]))
+            logging.info(f'查询到相关记忆:\n' + '\n'.join([str(elem) for elem in relative_memory]))
 
         # 事实搜索
         if self.use_search:
@@ -140,9 +144,14 @@ class Waifu():
             return ''
         if self.use_emoji:
             emoji = self.emoji.think(text)
-            return emoji
-        else:
-            return ''
+            print('emoji:' + emoji)
+            return text + emoji
+        elif self.use_qqface:
+            id = self.qqface.think(text)
+            print('id:' + str(id))
+            if id != -1:
+                return text + str(face(id))
+        return text
 
 
     def import_memory_dataset(self, text: str):

@@ -79,3 +79,13 @@ def load_memory(filename: str, waifuname):
         print(colored(f'记忆文件文件: {file_path} 不存在', 'red'))
 
     return memory
+
+
+def str2bool(text: str):
+    if text == 'True' or text == 'true':
+        return True
+    elif text == 'False' or text == 'false':
+        return False
+    else:
+        print(colored(f'无法将 {text} 转换为布尔值，请检查配置文件！'))
+        raise ValueError()

@@ -2,7 +2,7 @@ from waifu.Waifu import Waifu
 from waifu.StreamCallback import WaifuCallback
 from waifu.llm.GPT import GPT
 from qqbot.qqbot import make_qq_bot
-from waifu.Tools import load_prompt, load_emoticon, load_memory
+from waifu.Tools import load_prompt, load_emoticon, load_memory, str2bool
 import configparser
 
 config = configparser.ConfigParser()
@@ -19,9 +19,10 @@ callback = WaifuCallback()
 name 		 = config['CyberWaifu']['name']
 username     = config['CyberWaifu']['username']
 charactor 	 = config['CyberWaifu']['charactor']
-use_emoji 	 = config['CyberWaifu']['use_emoji']
-use_emoticon = config['CyberWaifu']['use_emoticon']
-use_search 	 = config['CyberWaifu']['use_search']
+use_emoji 	 = str2bool(config['CyberWaifu']['use_emoji'])
+use_qqface   = str2bool(config['CyberWaifu']['use_qqface'])
+use_emoticon = str2bool(config['CyberWaifu']['use_emoticon'])
+use_search 	 = str2bool(config['CyberWaifu']['use_search'])
 search_api	 = config['Thoughts_GoogleSerperAPI']['api']
 
 prompt = load_prompt(charactor)
@@ -43,6 +44,7 @@ waifu = Waifu(brain=brain,
 				use_search=use_search,
 				search_api=search_api,
 				use_emoji=use_emoji,
+				use_qqface=use_qqface,
 				use_emoticon=use_emoticon)
 
 # 记忆导入

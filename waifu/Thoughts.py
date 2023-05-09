@@ -1,5 +1,7 @@
 import json
+import re
 import random
+import waifu.QQFace
 from langchain.schema import HumanMessage, SystemMessage
 from langchain.utilities import GoogleSerperAPIWrapper
 from waifu.llm.Brain import Brain
@@ -73,6 +75,40 @@ class AddEmoji():
             if len(reply.content) > 3:
                 return ''
             return reply.content
+
+
+class AddQQFace():
+    '''添加 QQ 表情'''
+    def __init__(self, brain: Brain, probability=0.4):
+        self.brain = brain
+        self.table = waifu.QQFace.config
+        self.list = [item['id'] for item in self.table]
+        self.probability = probability
+        self.role = f'You are an emoticon selector that returns a emoticon <id> based on the given text. Emoticon table is "{self.table}".'
+
+
+    def think(self, text: str):
+        message = [
+            SystemMessage(content=self.role),
+            HumanMessage(content='Select a emoticon id for the following sentence:\n' + text)
+        ]
+
+        random_number = random.random()
+        if random_number <= self.probability:
+            send = True
+        else:
+            send = False
+
+        if not send:
+            return -1
+        else:
+            reply = self.brain.think_nonstream(message)
+            pattern = r'\d+'
+            numbers = re.findall(pattern, reply.content)
+            numbers = [int(x) for x in numbers]
+            if len(numbers) > 0 and numbers[0] in self.list:
+                return numbers[0]
+        return -1
 
 
 class Search():
