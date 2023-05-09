@@ -2,7 +2,7 @@ from waifu.Waifu import Waifu
 from waifu.StreamCallback import WaifuCallback
 from waifu.llm.GPT import GPT
 from qqbot.qqbot import make_qq_bot
-from waifu.Tools import load_prompt, load_emoticon
+from waifu.Tools import load_prompt, load_emoticon, load_memory
 import configparser
 
 config = configparser.ConfigParser()
@@ -17,6 +17,7 @@ callback = WaifuCallback()
 
 # CyberWaifu 配置
 name 		 = config['CyberWaifu']['name']
+username     = config['CyberWaifu']['username']
 charactor 	 = config['CyberWaifu']['charactor']
 use_emoji 	 = config['CyberWaifu']['use_emoji']
 use_emoticon = config['CyberWaifu']['use_emoticon']
@@ -34,13 +35,21 @@ model = config['LLM']['model']
 if model == 'OpenAI':
     openai_api = config['LLM_OpenAI']['openai_key']
     brain = GPT(openai_api, name, stream=True, callback=callback)
-    waifu = Waifu(brain=brain,
-                  prompt=prompt,
-                  name=name,
-                  use_search=use_search,
-                  search_api=search_api,
-                  use_emoji=use_emoji,
-                  use_emoticon=use_emoticon)
 
-# callback.regitster(waifu)
-# make_qq_bot(callback, waifu)
+waifu = Waifu(brain=brain,
+				prompt=prompt,
+				name=name,
+                username=username,
+				use_search=use_search,
+				search_api=search_api,
+				use_emoji=use_emoji,
+				use_emoticon=use_emoticon)
+
+# 记忆导入
+filename = config['CyberWaifu']['memory']
+if filename != '':
+	memory = load_memory(filename, waifu.name)
+	waifu.import_memory_dataset(memory)
+
+callback.register(waifu)
+make_qq_bot(callback, waifu)

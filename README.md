@@ -25,15 +25,15 @@ CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实�
 
 ✅ 联网搜索：根据用户的信息，自主构造搜索决策，并引入上下文。
 
+✅ QQ 机器人部署
+
+✅ 人设模板、自定义人设
+
 ⬜ vits 双语（中、日）多音色支持
 
 ⬜ emotion-vits 支持
 
 ⬜ bark 支持
-
-⬜ QQ 机器人部署
-
-⬜ 人设模板、自定义人设
 
 ⬜ AI 绘图支持，将绘图引入思考链，使 AI 可以生成图片，例如自拍
 
@@ -50,4 +50,25 @@ conda activate CyberWaifu
 pip install -r requirements.txt
 ```
 
-### 运行
+#### QQ 机器人部署：
+根据 [go-cqhttp 下载文档](https://docs.go-cqhttp.org/guide/quick_start.html#%E4%B8%8B%E8%BD%BD)，下载相应平台的可执行程序，并放入 `qqbot` 目录中
+
+### 配置
+
+按照 `template.ini` 进行配置，配置完成后改名为 `config.ini`
+
+#### QQ 机器人配置：
+运行 `main.py` 提示：
+
+```
+PyCqBot: go-cqhttp 警告 账号密码未配置, 将使用二维码登录.
+PyCqBot: go-cqhttp 警告 虚拟设备信息不存在, 将自动生成随机设备.
+PyCqBot: go-cqhttp 警告 当前协议不支持二维码登录, 请配置账号密码登录.
+```
+
+在 `qqbot/device.json` 文件中，找到字段 `protocol`，将值修改为 2 即可扫码登录
+
+#### 人设 Prompt 配置
+根据 `presets/charactor/模板.txt` 进行编写，将编写好的人设 Prompt 丢到 `presets/charactor` 目录下即可，随后在 `config.ini` 配置文件中的 `charactor` 字段填写文件名（不包含后缀名）
+
+记忆设定同样是丢到 `presets/charactor` 目录下，多段记忆用空行分开，并在配置文件中填写 `memory` 字段

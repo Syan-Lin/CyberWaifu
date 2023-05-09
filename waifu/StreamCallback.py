@@ -13,7 +13,7 @@ class WaifuCallback(BaseCallbackHandler):
     def __init__(self):
         self.text = ''
 
-    def regitster(self, waifu: Waifu):
+    def register(self, waifu: Waifu):
         self.waifu = waifu
 
     def set_sender(self, sender):

@@ -13,9 +13,13 @@ class VectorDB:
     def store(self, text: str | list):
         '''保存 vector'''
         if isinstance(text, str):
+            if text == '':
+                return
             vector = self.embedding.embed_documents([text])
             df = pd.DataFrame({"text": text, "embedding": vector})
         elif isinstance(text, list):
+            if len(text) == 0:
+                return
             vector = self.embedding.embed_documents(text)
             df = pd.DataFrame({"text": text, "embedding": vector})
         else:
@@ -24,6 +28,8 @@ class VectorDB:
 
 
     def query(self, text: str, top_n: int):
+        if text == '':
+            return ['']
         relatedness_fn=lambda x, y: 1 - spatial.distance.cosine(x, y)
 
         # Load embeddings data
@@ -40,9 +46,6 @@ class VectorDB:
             (row["text"], relatedness_fn(query_embedding, row["embedding"]))
             for i, row in df.iterrows()
         ]
-
-        print(f'\nquery:{text}\n')
-        print(f'\n{strings_and_relatednesses}\n')
 
         # Rank
         strings_and_relatednesses.sort(key=lambda x: x[1], reverse=True)

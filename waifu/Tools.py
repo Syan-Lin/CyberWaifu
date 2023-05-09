@@ -63,3 +63,19 @@ def load_emoticon(emoticons: list):
         print(colored(f'表情包加载失败，图片文件 {e} 不存在！', 'red'))
     except:
         print(colored(f'表情包加载失败，请检查配置', 'red'))
+
+
+def load_memory(filename: str, waifuname):
+    file_path = f'./presets/charactor/{filename}.txt'
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            memory = f.read()
+        if os.path.exists(f'./memory/{waifuname}.csv'):
+            print(colored(f'记忆数据库存在，不导入记忆', 'yellow'))
+            return ''
+        else:
+            print(colored(f'记忆导入成功！', 'green'))
+    except:
+        print(colored(f'记忆文件文件: {file_path} 不存在', 'red'))
+
+    return memory

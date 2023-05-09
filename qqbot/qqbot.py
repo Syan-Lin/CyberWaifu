@@ -16,7 +16,6 @@ def make_qq_bot(callback, waifu: Waifu):
         if 'CQ' in message.message and 'image' in message.message:
             return
         callback.set_sender(message.sender)
-        sys.stdout = sys.__stdout__
         waifu.ask(message.message)
 
     bot = cqapi.create_bot(
@@ -44,5 +43,4 @@ def make_qq_bot(callback, waifu: Waifu):
     #     ],
     #     "type": "all"
     # })
-    sys.stdout = open(os.devnull, 'w', encoding='utf-8')
     bot.start(go_cqhttp_path='./qqbot/')

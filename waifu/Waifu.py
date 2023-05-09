@@ -1,4 +1,5 @@
 import json
+import os
 import waifu.Thoughts
 from waifu.Tools import make_message, message_period_to_now
 from waifu.llm.Brain import Brain
@@ -17,13 +18,14 @@ class Waifu():
                  brain: Brain,
                  prompt: str,
                  name: str,
+                 username: str,
                  use_search: bool = False,
                  search_api: str = '',
                  use_emoji: bool = True,
                  use_emoticon: bool = True):
         self.brain = brain
         self.name = name
-        self.charactor_prompt = SystemMessage(content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"')
+        self.charactor_prompt = SystemMessage(content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.')
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
         self.waifu_reply = ''
@@ -40,6 +42,8 @@ class Waifu():
 
     def ask(self, text: str):
         '''发送信息'''
+        if text == '':
+            return ''
         message = make_message(text)
         # 第一次检查用户输入文本是否过长
         if self.brain.llm.get_num_tokens_from_messages([message]) >= 256:
@@ -117,6 +121,8 @@ class Waifu():
 
 
     def finish_ask(self, text: str):
+        if text == '':
+            return ''
         self.chat_memory.add_ai_message(text)
         self.history.add_ai_message(text)
         self.save_memory()
@@ -129,6 +135,8 @@ class Waifu():
 
 
     def add_emoji(self, text: str):
+        if text == '':
+            return ''
         if self.use_emoji:
             emoji = self.emoji.think(text)
             return emoji
@@ -138,11 +146,13 @@ class Waifu():
 
     def import_memory_dataset(self, text: str):
         '''导入记忆数据库, text 是按换行符分块的长文本'''
+        if text == '':
+            return
         chunks = text.split('\n\n')
         self.brain.store_memory(chunks)
 
 
-    def save_memory_dataset(self, memory: str):
+    def save_memory_dataset(self, memory: str | list):
         '''保存至记忆数据库, memory 可以是文本列表, 也是可以是文本'''
         self.brain.store_memory(memory)
 
@@ -150,6 +160,8 @@ class Waifu():
     def load_memory(self):
         '''读取历史记忆'''
         try:
+            if not os.path.isdir('./memory'):
+                os.makedirs('./memory')
             with open(f'./memory/{self.name}.json', 'r', encoding='utf-8') as f:
                 dicts = json.load(f)
                 self.chat_memory.messages = messages_from_dict(dicts)
@@ -171,6 +183,8 @@ class Waifu():
     def save_memory(self):
         '''保存记忆'''
         dicts = messages_to_dict(self.history.messages)
+        if not os.path.isdir('./memory'):
+            os.makedirs('./memory')
         with open(f'./memory/{self.name}.json', 'w',encoding='utf-8') as f:
             json.dump(dicts, f, ensure_ascii=False)
 
