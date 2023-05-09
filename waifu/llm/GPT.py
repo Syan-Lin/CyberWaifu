@@ -15,7 +15,7 @@ class GPT(Brain):
                         model_name=model,
                         streaming=stream,
                         callbacks=[callback],
-                        temperature=1)
+                        temperature=0.85)
         self.llm_nonstream = ChatOpenAI(openai_api_key=api_key, model_name=model)
         self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
         self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')

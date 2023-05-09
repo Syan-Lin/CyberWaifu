@@ -128,7 +128,8 @@ class Waifu():
         self.save_memory()
         if self.use_emoticon:
             file = self.emoticon.think(text)
-            logging.info(f'发送表情包: {file}')
+            if file != '':
+                logging.info(f'发送表情包: {file}')
             return file
         else:
             return ''

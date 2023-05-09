@@ -1,6 +1,5 @@
 from pycqBot.cqHttpApi import cqHttpApi, cqLog
 from pycqBot.data import Message
-from pycqBot.cqCode import image
 from waifu.Waifu import Waifu
 
 import os
