@@ -70,6 +70,23 @@ PyCqBot: go-cqhttp 警告 当前协议不支持二维码登录, 请配置账号�
 
 在 `qqbot/device.json` 文件中，找到字段 `protocol`，将值修改为 2 即可扫码登录
 
+权限设置：`qqbot/bot.json` 文件
+
+```json
+{
+    // 需处理的 QQ 群信息 为空处理所有，目前的 AI 思考链针对私聊设计，群聊效果并不好
+    "group_id_list": [
+        123456,
+        654321
+    ],
+    // 需要处理的 QQ 私聊信息，为空处理所有
+    "user_id_list": [
+        1234567,
+        7654321
+    ]
+}
+```
+
 #### 人设 Prompt 配置
 根据 `presets/charactor/模板.txt` 进行编写，将编写好的人设 Prompt 丢到 `presets/charactor` 目录下即可，随后在 `config.ini` 配置文件中的 `charactor` 字段填写文件名（不包含后缀名）
 

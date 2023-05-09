@@ -1,10 +1,14 @@
 from pycqBot.cqHttpApi import cqHttpApi, cqLog
 from pycqBot.data import Message
 from waifu.Waifu import Waifu
-
-import os
-import sys
 import logging
+import json
+
+def load_config():
+    with open(f'./qqbot/bot.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+        return data['group_id_list'], data['user_id_list']
+
 
 def make_qq_bot(callback, waifu: Waifu):
     cqLog(level=logging.INFO, logPath='./qqbot/cqLogs')
@@ -17,15 +21,11 @@ def make_qq_bot(callback, waifu: Waifu):
         callback.set_sender(message.sender)
         waifu.ask(message.message)
 
+    group, user = load_config()
+
     bot = cqapi.create_bot(
-        group_id_list=[
-            # 需处理的 QQ 群信息 为空处理所有
-            0 # 不处理群消息
-        ],
-        user_id_list=[
-            # 需处理的 QQ 信息 为空处理所有
-            475694569
-        ]
+        group_id_list=group,
+        user_id_list=user
     )
 
     bot.on_private_msg = on_private_msg
