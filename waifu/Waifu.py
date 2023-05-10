@@ -5,9 +5,6 @@ from pycqBot.cqCode import face
 from waifu.Tools import make_message, message_period_to_now
 from waifu.llm.Brain import Brain
 from langchain.schema import messages_from_dict, messages_to_dict
-from langchain.chains.summarize import load_summarize_chain
-from langchain.docstore.document import Document
-from langchain.prompts.chat import PromptTemplate
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.memory import ChatMessageHistory
 import logging
@@ -28,6 +25,7 @@ class Waifu():
                  use_emoticon: bool = True):
         self.brain = brain
         self.name = name
+        self.username = username
         self.charactor_prompt = SystemMessage(content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.')
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
@@ -61,6 +59,7 @@ class Waifu():
         if self.brain.llm.get_num_tokens_from_messages([message]) >= 256:
             raise ValueError('The text is too long!')
         # 第二次检查 历史记录+用户文本 是否过长
+        logging.debug(f'历史记录长度: {self.brain.llm.get_num_tokens_from_messages([message]) + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)}')
         if self.brain.llm.get_num_tokens_from_messages([message])\
                 + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 1536:
             self.summarize_memory()
@@ -116,7 +115,7 @@ class Waifu():
         while self.brain.llm.get_num_tokens_from_messages(messages) > 4096:
             self.cut_memory()
         logging.debug(f'LLM query')
-        self.brain.think(messages)
+        reply = self.brain.think(messages)
 
         history = []
         for message in self.chat_memory.messages:
@@ -131,6 +130,7 @@ class Waifu():
             self.summarize_memory()
 
         logging.info('结束回复')
+        return reply
 
 
     def finish_ask(self, text: str):
@@ -216,22 +216,24 @@ class Waifu():
 
     def summarize_memory(self):
         '''总结 chat_memory 并保存到记忆数据库中'''
-        docs = []
-        for t in self.chat_memory.messages:
-            if isinstance(t, HumanMessage):
-                docs.append(Document(page_content=f'用户:{t.content}'))
-            elif isinstance(t, AIMessage):
-                docs.append(Document(page_content=f'{self.name}:{t.content}'))
-        prompt_template = """Write a concise summary of the following, time information should be include:
+        prompt = ''
+        for mes in self.chat_memory.messages:
+            if isinstance(mes, HumanMessage):
+                prompt += f'{self.username}: {mes.content}\n\n'
+            elif isinstance(mes, SystemMessage):
+                prompt += f'System Information: {mes.content}\n\n'
+            elif isinstance(mes, AIMessage):
+                prompt += f'{self.name}: {mes.content}\n\n'
+        prompt_template = f"""Write a concise summary of the following, time information should be include:
 
 
-        {text}
+        {prompt}
 
 
         CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS:"""
-        PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-        chain = load_summarize_chain(self.brain.llm_nonstream, chain_type="stuff", prompt=PROMPT)
-        summary = chain.run(docs)
+        print('开始总结')
+        summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)]).content
+        print('结束总结')
         while len(self.chat_memory.messages) > 4:
             self.cut_memory()
         self.save_memory_dataset(summary)

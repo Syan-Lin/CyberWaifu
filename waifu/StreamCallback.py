@@ -40,6 +40,8 @@ class WaifuCallback(BaseCallbackHandler):
                 logging.info(f'发送信息: {sentence}')
             if self.send_voice:
                 emotion = self.waifu.analyze_emotion(sentence)
+                if sentence == '' or sentence == ' ':
+                    return
                 self.tts.speak(sentence, emotion)
                 file_path = './output.wav'
                 abs_path = os.path.abspath(file_path)
