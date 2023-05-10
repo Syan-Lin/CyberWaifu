@@ -74,7 +74,8 @@ def load_memory(filename: str, waifuname):
             print(colored(f'记忆数据库存在，不导入记忆', 'yellow'))
             return ''
         else:
-            print(colored(f'记忆导入成功！', 'green'))
+            chunks = memory.split('\n\n')
+            print(colored(f'记忆导入成功！({len(chunks)} 条记忆)', 'green'))
     except:
         print(colored(f'记忆文件文件: {file_path} 不存在', 'red'))
 

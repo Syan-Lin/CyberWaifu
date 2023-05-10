@@ -2,16 +2,21 @@ from langchain.callbacks.base import BaseCallbackHandler
 from typing import Any, Dict, List, Union
 from langchain.schema import AgentAction, AgentFinish, LLMResult
 from waifu.Tools import get_first_sentence
-from pycqBot.cqCode import image
+from pycqBot.cqCode import image, record
 from waifu.Waifu import Waifu
+from tts.TTS import TTS
 import os
+import time
 import logging
 
 class WaifuCallback(BaseCallbackHandler):
     """Callback handler for streaming. Only works with LLMs that support streaming."""
 
-    def __init__(self):
+    def __init__(self, tts: TTS = None, send_text: bool = True, send_voice: bool = False):
         self.text = ''
+        self.tts = tts
+        self.send_text = send_text
+        self.send_voice = send_voice
 
     def register(self, waifu: Waifu):
         self.waifu = waifu
@@ -30,11 +35,36 @@ class WaifuCallback(BaseCallbackHandler):
         self.text += token
         sentence, self.text = get_first_sentence(self.text)
         if not sentence == '':
-            self.sender.send_message(self.waifu.add_emoji(sentence))
-            logging.info(f'发送信息: {sentence}')
+            if self.send_text:
+                self.sender.send_message(self.waifu.add_emoji(sentence))
+                logging.info(f'发送信息: {sentence}')
+            if self.send_voice:
+                emotion = self.waifu.analyze_emotion(sentence)
+                self.tts.speak(sentence, emotion)
+                file_path = './output.wav'
+                abs_path = os.path.abspath(file_path)
+                mtime = os.path.getmtime(file_path)
+                local_time = time.localtime(mtime)
+                time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+                self.sender.send_message("%s" % record(file='file:///' + abs_path))
+                logging.info(f'发送语音({emotion} {time_str}): {sentence}')
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         """Run when LLM ends running."""
+        if len(self.text) > 0:
+            if self.send_text:
+                self.sender.send_message(self.waifu.add_emoji(self.text))
+                logging.info(f'发送信息: {self.text}')
+            if self.send_voice:
+                emotion = self.waifu.analyze_emotion(self.text)
+                self.tts.speak(self.text, emotion)
+                file_path = './output.wav'
+                abs_path = os.path.abspath(file_path)
+                mtime = os.path.getmtime(file_path)
+                local_time = time.localtime(mtime)
+                time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+                self.sender.send_message("%s" % record(file='file:///' + abs_path))
+                logging.info(f'发送语音({emotion} {time_str}): {self.text}')
         file_name = self.waifu.finish_ask(response.generations[0][0].text)
         if not file_name == '':
             file_path = './presets/emoticon/' + file_name

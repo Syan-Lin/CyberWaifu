@@ -141,21 +141,21 @@ class Search():
         return question, answer
 
 
-def Emotion():
+class Emotion():
     '''情绪识别'''
     def __init__(self, brain: Brain):
         self.brain = brain
-        self.role = '''Analyzes the sentiment of a given text. Response with one of ['平静陈述', '高兴开心', '生气严肃', '难过悲伤', '温柔深情', '害羞']'''
+        self.moods = ['表现自己可爱', '生气', '高兴兴奋', '难过', '平常聊天', '温柔', '尴尬害羞']
+        self.role = f'''Analyzes the sentiment of a given text said by a girl. When it comes to intimate behavior, such as sexual activity, one should reply with a sense of shyness. Response with one of {self.moods}.'''
 
 
     def think(self, text: str):
         message = [
             SystemMessage(content=self.role),
-            HumanMessage(content=f'''Response with one of ['平静陈述', '高兴开心', '生气严肃', '难过悲伤', '温柔深情', '害羞'] for the following text:\n"{text}"''')
+            HumanMessage(content=f'''Response with one of {self.moods} for the following text:\n"{text}"''')
         ]
-        mood = ['平静陈述', '高兴开心', '生气严肃', '难过悲伤', '温柔深情', '害羞']
         reply = self.brain.think_nonstream(message).content
-        if mood in reply:
-            return reply
-        else:
-            return '平静陈述'
+        for mood in self.moods:
+            if mood in reply:
+                return mood
+        return '平常聊天'

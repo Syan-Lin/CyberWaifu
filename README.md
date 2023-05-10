@@ -31,9 +31,9 @@ CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实�
 
 ✅ 人设模板、自定义人设
 
-⬜ vits, emotion-vits 支持
+✅ edge-tts, azure 语音服务支持
 
-⬜ edge-tts 支持
+⬜ vits, emotion-vits 支持
 
 ⬜ bark 支持
 
@@ -54,6 +54,14 @@ pip install -r requirements.txt
 
 #### QQ 机器人部署
 根据 [go-cqhttp 下载文档](https://docs.go-cqhttp.org/guide/quick_start.html#%E4%B8%8B%E8%BD%BD)，下载相应平台的可执行程序，并放入 `qqbot` 目录中
+
+#### ffmpeg 安装
+为了支持任意格式的语音发送，按照 go-cqhttp 要求，需要 [下载ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z) 解压到 `qqbot/ffmpeg` 文件夹中（如果不存在请自行创建）
+
+Windows 在 cmd 中执行：X 部分替换为你的项目所在目录，设置完成后需要重启电脑
+```cmd
+setx /M PATH "X:\XXX\CyberWaifu\qqbot\ffmpeg\bin;%PATH%"
+```
 
 ### 配置✏️
 
