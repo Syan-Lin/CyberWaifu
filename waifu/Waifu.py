@@ -38,11 +38,16 @@ class Waifu():
         self.use_search = use_search
         self.use_qqface = use_qqface
         self.use_emotion = use_emotion
-        self.emoji = waifu.Thoughts.AddEmoji(self.brain)
-        self.emoticon = waifu.Thoughts.SendEmoticon(self.brain)
-        self.search = waifu.Thoughts.Search(self.brain, search_api)
-        self.qqface = waifu.Thoughts.AddQQFace(self.brain)
-        self.emotion = waifu.Thoughts.Emotion(self.brain)
+        if use_emoji:
+            self.emoji = waifu.Thoughts.AddEmoji(self.brain)
+        if use_emoticon:
+            self.emoticon = waifu.Thoughts.SendEmoticon(self.brain)
+        if use_search:
+            self.search = waifu.Thoughts.Search(self.brain, search_api)
+        if use_qqface:
+            self.qqface = waifu.Thoughts.AddQQFace(self.brain)
+        if use_emoticon:
+            self.emotion = waifu.Thoughts.Emotion(self.brain)
 
         self.load_memory()
 
@@ -110,6 +115,7 @@ class Waifu():
         messages.extend(self.chat_memory.messages)
         while self.brain.llm.get_num_tokens_from_messages(messages) > 4096:
             self.cut_memory()
+        logging.debug(f'LLM query')
         self.brain.think(messages)
 
         history = []
