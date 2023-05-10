@@ -80,7 +80,7 @@ PyCqBot: go-cqhttp 警告 当前协议不支持二维码登录, 请配置账号�
 
 权限设置：`qqbot/bot.json` 文件
 
-```json
+```json5
 {
     // 需处理的 QQ 群信息 为空处理所有，目前的 AI 思考链针对私聊设计，群聊效果并不好
     "group_id_list": [
