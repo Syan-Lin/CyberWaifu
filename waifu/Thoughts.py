@@ -42,7 +42,7 @@ class SendEmoticon():
         else:
             reply = self.brain.think_nonstream(message)
             for image in self.description["images"]:
-                if image["file_name"] in reply.content:
+                if image["file_name"] in reply:
                     return image["file_name"]
             return ''
 
@@ -72,9 +72,9 @@ class AddEmoji():
             return ''
         else:
             reply = self.brain.think_nonstream(message)
-            if len(reply.content) > 3:
+            if len(reply) > 3:
                 return ''
-            return reply.content
+            return reply
 
 
 class AddQQFace():
@@ -104,7 +104,7 @@ class AddQQFace():
         else:
             reply = self.brain.think_nonstream(message)
             pattern = r'\d+'
-            numbers = re.findall(pattern, reply.content)
+            numbers = re.findall(pattern, reply)
             numbers = [int(x) for x in numbers]
             if len(numbers) > 0 and numbers[0] in self.list:
                 return numbers[0]
@@ -127,14 +127,14 @@ class Search():
         #     SystemMessage(content=self.check),
         #     HumanMessage(content=f'Chekc the following text:\n"{text}"')
         # ]
-        # reply = self.brain.think_nonstream(check).content
+        # reply = self.brain.think_nonstream(check)
         # if not reply == 'yes':
         #     return '', ''
         message = [
             SystemMessage(content=self.role),
             HumanMessage(content=f'Make a Chinese search keyword for the following text:\n"{text}"')
         ]
-        question = self.brain.think_nonstream(message).content
+        question = self.brain.think_nonstream(message)
         answer = self.search.run(question)
         if len(answer) >= 256:
             answer = answer[0:256]
@@ -154,7 +154,7 @@ class Emotion():
             SystemMessage(content=self.role),
             HumanMessage(content=f'''Response with one of {self.moods} for the following text:\n"{text}"''')
         ]
-        reply = self.brain.think_nonstream(message).content
+        reply = self.brain.think_nonstream(message)
         for mood in self.moods:
             if mood in reply:
                 return mood

@@ -3,6 +3,8 @@ from waifu.llm.VectorDB import VectorDB
 from waifu.llm.SentenceTransformer import STEmbedding
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
+from typing import Any, List, Mapping, Optional
+from langchain.schema import BaseMessage
 import openai
 
 class GPT(Brain):
@@ -25,20 +27,12 @@ class GPT(Brain):
             openai.proxy = proxy
 
 
-    def think(self, messages: list):
-        return self.llm(messages)
+    def think(self, messages: List[BaseMessage]):
+        return self.llm(messages).content
 
 
-    def think_nonstream(self, messages: list):
-        return self.llm_nonstream(messages)
-
-
-    def llm(self):
-        return self.llm
-
-
-    def llm_nonstream(self):
-        return self.llm_nonstream
+    def think_nonstream(self, messages: List[BaseMessage]):
+        return self.llm_nonstream(messages).content
 
 
     def store_memory(self, text: str | list):

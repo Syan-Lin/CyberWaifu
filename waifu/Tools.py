@@ -2,6 +2,7 @@ import re
 import os
 import json
 import datetime
+from typing import List
 from dateutil.parser import parse
 from langchain.schema import HumanMessage, BaseMessage
 from termcolor import colored
@@ -13,6 +14,11 @@ def get_first_sentence(text: str):
     first_sentence = sentences[0]
     after = text[len(first_sentence):]
     return first_sentence, after
+
+
+def divede_sentences(text: str) -> List[str]:
+    sentences = re.findall(r'.*?[。！？…]+', text)
+    return sentences
 
 
 def make_message(text: str):

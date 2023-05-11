@@ -15,16 +15,6 @@ class Brain(metaclass=abc.ABCMeta):
 
 
     @abstractmethod
-    def llm(self):
-        pass
-
-
-    @abstractmethod
-    def llm_nonstream(self):
-        pass
-
-
-    @abstractmethod
     def store_memory(self, memory: str | list):
         pass
 

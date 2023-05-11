@@ -50,7 +50,7 @@ class Waifu():
         self.load_memory()
 
 
-    def ask(self, text: str):
+    def ask(self, text: str) -> str:
         '''发送信息'''
         if text == '':
             return ''
@@ -133,7 +133,7 @@ class Waifu():
         return reply
 
 
-    def finish_ask(self, text: str):
+    def finish_ask(self, text: str) -> str:
         if text == '':
             return ''
         self.chat_memory.add_ai_message(text)
@@ -148,7 +148,8 @@ class Waifu():
             return ''
 
 
-    def add_emoji(self, text: str):
+    def add_emoji(self, text: str) -> str:
+        '''返回添加表情后的句子'''
         if text == '':
             return ''
         if self.use_emoji:
@@ -161,7 +162,8 @@ class Waifu():
         return text
 
 
-    def analyze_emotion(self, text: str):
+    def analyze_emotion(self, text: str) -> str:
+        '''返回情绪分析结果'''
         if text == '':
             return ''
         if self.use_emotion:
@@ -232,7 +234,7 @@ class Waifu():
 
         CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS:"""
         print('开始总结')
-        summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)]).content
+        summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
         print('结束总结')
         while len(self.chat_memory.messages) > 4:
             self.cut_memory()

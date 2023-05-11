@@ -1,6 +1,7 @@
 from waifu.Waifu import Waifu
 from waifu.StreamCallback import WaifuCallback
 from waifu.llm.GPT import GPT
+from waifu.llm.Claude import Claude
 from tts.TTS import TTS
 from tts.edge.edge import speak
 from qqbot.qqbot import make_qq_bot
@@ -38,9 +39,6 @@ if tts_model == 'Edge':
 	if api == '':
 		use_emotion = False
 
-# QQ bot 回调
-callback = WaifuCallback(tts, send_text, send_voice)
-
 # Thoughts 思考链配置
 emoticons = config.items('Thoughts_Emoticon')
 load_emoticon(emoticons)
@@ -49,7 +47,13 @@ load_emoticon(emoticons)
 model = config['LLM']['model']
 if model == 'OpenAI':
     openai_api = config['LLM_OpenAI']['openai_key']
+    callback = WaifuCallback(tts, send_text, send_voice)
     brain = GPT(openai_api, name, stream=True, callback=callback)
+elif model == 'Claude':
+	callback = None
+	user_oauth_token = config['LLM_Claude']['user_oauth_token']
+	bot_id = config['LLM_Claude']['bot_id']
+	brain = Claude(bot_id, user_oauth_token, name)
 
 waifu = Waifu(brain=brain,
 				prompt=prompt,
@@ -68,5 +72,10 @@ if filename != '':
 	memory = load_memory(filename, waifu.name)
 	waifu.import_memory_dataset(memory)
 
-callback.register(waifu)
-make_qq_bot(callback, waifu)
+# waifu.ask('你在干嘛呢？')
+
+# input()
+
+if model == 'OpenAI':
+	callback.register(waifu)
+make_qq_bot(callback, waifu, send_text, send_voice, tts)

@@ -15,6 +15,10 @@ CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实�
 
 该项目使用 [LangChain](https://github.com/hwchase17/langchain) 作为 LLM 主体框架，使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 进行 QQ 机器人部署，TTS 支持 vits、[edge-tts](https://github.com/rany2/edge-tts)。
 
+语言模型支持：
+- ChatGPT
+- Claude
+
 ### 功能
 
 ✅ 预定义的思考链：使 AI 可以进行一定的逻辑思考，进行决策。例如在文本中添加 Emoji、发送表情包等等。
@@ -63,9 +67,20 @@ Windows 在 cmd 中执行：X 部分替换为你的项目所在目录，设置�
 setx /M PATH "X:\XXX\CyberWaifu\qqbot\ffmpeg\bin;%PATH%"
 ```
 
+#### 记忆数据库向量计算模型
+为了支持本地的文本向量计算，需要引入 text embedding 模型，这里使用 [Sentence Transformer](https://github.com/UKPLab/sentence-transformers)
+
+首先 [下载模型](https://public.ukp.informatik.tu-darmstadt.de/reimers/sentence-transformers/v0.2/paraphrase-multilingual-MiniLM-L12-v2.zip)，然后解压到根目录的 `st_model` 文件夹，如果不存在请手动创建
+
 ### 配置✏️
 
 按照 `template.ini` 进行配置，配置完成后改名为 `config.ini`
+
+#### 大语言模型配置
+
+- OpenAI：需要配置 `openai_key`，这部分网上有很多教程，就不赘述了
+- Claude：需要配置 `user_oauth_token` 和 `bot_id`，具体参考 [Claude API 接入教程](https://juejin.cn/post/7230366377705472060)
+
 
 #### QQ 机器人配置：
 运行 `main.py` 提示：
