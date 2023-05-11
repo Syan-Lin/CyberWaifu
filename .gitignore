@@ -13,6 +13,7 @@ chatgpt
 
 # 模型文件
 *.pth
+st_model
 
 # 隐私文件
 config.ini

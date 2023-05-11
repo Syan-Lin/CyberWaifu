@@ -51,6 +51,6 @@ class VectorDB:
         strings_and_relatednesses.sort(key=lambda x: x[1], reverse=True)
         strings, relatednesses = zip(*strings_and_relatednesses)
         for i in range(len(relatednesses)):
-            if relatednesses[i] < 0.8:
+            if relatednesses[i] < 0.7:
                 break
         return strings[:min(i+1, top_n)]

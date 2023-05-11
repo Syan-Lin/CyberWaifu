@@ -1,5 +1,6 @@
 from waifu.llm.Brain import Brain
 from waifu.llm.VectorDB import VectorDB
+from waifu.llm.SentenceTransformer import STEmbedding
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 import openai
@@ -17,7 +18,8 @@ class GPT(Brain):
                         callbacks=[callback],
                         temperature=0.85)
         self.llm_nonstream = ChatOpenAI(openai_api_key=api_key, model_name=model)
-        self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
+        # self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
+        self.embedding = STEmbedding()
         self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')
         if proxy != '':
             openai.proxy = proxy
