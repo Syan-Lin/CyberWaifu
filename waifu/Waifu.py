@@ -26,7 +26,7 @@ class Waifu():
         self.brain = brain
         self.name = name
         self.username = username
-        self.charactor_prompt = SystemMessage(content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.')
+        self.charactor_prompt = SystemMessage(content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n')
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
         self.waifu_reply = ''

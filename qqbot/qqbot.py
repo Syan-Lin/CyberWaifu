@@ -28,29 +28,36 @@ def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
     def on_private_msg_nonstream(message: Message):
         if 'CQ' in message.message:
             return
-        reply = waifu.ask(message.message)
-        sentences = divede_sentences(reply)
-        for st in sentences:
-            if st == '' or st == ' ':
-                continue
-            if send_text:
-                message.sender.send_message(waifu.add_emoji(st))
-                logging.info(f'发送信息: {st}')
-            if send_voice:
-                emotion = waifu.analyze_emotion(st)
-                tts.speak(st, emotion)
-                file_path = './output.wav'
+        try:
+            reply = waifu.ask(message.message)
+            sentences = divede_sentences(reply)
+            for st in sentences:
+                time.sleep(0.5)
+                if st == '' or st == ' ':
+                    continue
+                if send_text:
+                    message.sender.send_message(waifu.add_emoji(st))
+                    logging.info(f'发送信息: {st}')
+                if send_voice:
+                    emotion = waifu.analyze_emotion(st)
+                    tts.speak(st, emotion)
+                    file_path = './output.wav'
+                    abs_path = os.path.abspath(file_path)
+                    mtime = os.path.getmtime(file_path)
+                    local_time = time.localtime(mtime)
+                    time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+                    message.sender.send_message("%s" % record(file='file:///' + abs_path))
+                    logging.info(f'发送语音({emotion} {time_str}): {st}')
+            time.sleep(0.5)
+            file_name = waifu.finish_ask(reply)
+            if not file_name == '':
+                file_path = './presets/emoticon/' + file_name
                 abs_path = os.path.abspath(file_path)
-                mtime = os.path.getmtime(file_path)
-                local_time = time.localtime(mtime)
-                time_str = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
-                message.sender.send_message("%s" % record(file='file:///' + abs_path))
-                logging.info(f'发送语音({emotion} {time_str}): {st}')
-        file_name = waifu.finish_ask(reply)
-        if not file_name == '':
-            file_path = './presets/emoticon/' + file_name
-            abs_path = os.path.abspath(file_path)
-            message.sender.send_message("%s" % image(file='file:///' + abs_path))
+                message.sender.send_message("%s" % image(file='file:///' + abs_path))
+            time.sleep(0.5)
+            waifu.brain.think('/reset 请忘记之前的对话')
+        except Exception as e:
+            print(e)
 
     group, user = load_config()
 

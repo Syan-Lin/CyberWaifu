@@ -8,7 +8,7 @@ from langchain.schema import HumanMessage, BaseMessage
 from termcolor import colored
 
 def get_first_sentence(text: str):
-    sentences = re.findall(r'.*?[。！？…]+', text)
+    sentences = re.findall(r'.*?[~。！？…]+', text)
     if len(sentences) == 0:
         return '', text
     first_sentence = sentences[0]
@@ -17,7 +17,7 @@ def get_first_sentence(text: str):
 
 
 def divede_sentences(text: str) -> List[str]:
-    sentences = re.findall(r'.*?[。！？…]+', text)
+    sentences = re.findall(r'.*?[~。！？…]+', text)
     return sentences
 
 

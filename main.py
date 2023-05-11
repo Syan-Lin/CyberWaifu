@@ -72,9 +72,6 @@ if filename != '':
 	memory = load_memory(filename, waifu.name)
 	waifu.import_memory_dataset(memory)
 
-# waifu.ask('你在干嘛呢？')
-
-# input()
 
 if model == 'OpenAI':
 	callback.register(waifu)
