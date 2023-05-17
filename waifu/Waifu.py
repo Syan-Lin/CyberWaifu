@@ -39,7 +39,7 @@ class Waifu():
         if use_emoji:
             self.emoji = waifu.Thoughts.AddEmoji(self.brain)
         if use_emoticon:
-            self.emoticon = waifu.Thoughts.SendEmoticon(self.brain)
+            self.emoticon = waifu.Thoughts.SendEmoticon(self.brain, 0.6)
         if use_search:
             self.search = waifu.Thoughts.Search(self.brain, search_api)
         if use_qqface:
@@ -73,7 +73,7 @@ class Waifu():
         logging.info(f'开始！接收到信息: {text}')
 
         # 相关记忆
-        relative_memory = self.brain.extract_memory(text)
+        relative_memory, relativeness = self.brain.extract_memory(text)
 
         is_full = False
         total_token = 0
@@ -89,7 +89,10 @@ class Waifu():
             memory_message = SystemMessage(content=memory_prompt)
             messages.append(memory_message)
 
-            logging.info(f'查询到相关记忆:\n' + '\n'.join([str(elem) for elem in relative_memory]))
+            mem_info = ''
+            for i in range(len(relative_memory)):
+                mem_info += f'{relative_memory[i]}[相关性: {relativeness[i]}]\n'
+            logging.info(f'查询到相关记忆:\n' + mem_info)
 
         # 事实搜索
         if self.use_search:

@@ -38,6 +38,7 @@ class WaifuCallback(BaseCallbackHandler):
             if self.send_text:
                 self.sender.send_message(self.waifu.add_emoji(sentence))
                 logging.info(f'发送信息: {sentence}')
+                time.sleep(0.5)
             if self.send_voice:
                 emotion = self.waifu.analyze_emotion(sentence)
                 if sentence == '' or sentence == ' ':

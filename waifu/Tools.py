@@ -18,6 +18,8 @@ def get_first_sentence(text: str):
 
 def divede_sentences(text: str) -> List[str]:
     sentences = re.findall(r'.*?[~。！？…]+', text)
+    if len(sentences) == 0:
+        return [text]
     return sentences
 
 

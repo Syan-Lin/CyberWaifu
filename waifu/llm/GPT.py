@@ -20,8 +20,8 @@ class GPT(Brain):
                         callbacks=[callback],
                         temperature=0.85)
         self.llm_nonstream = ChatOpenAI(openai_api_key=api_key, model_name=model)
-        # self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
-        self.embedding = STEmbedding()
+        self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
+        # self.embedding = STEmbedding()
         self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')
         if proxy != '':
             openai.proxy = proxy
