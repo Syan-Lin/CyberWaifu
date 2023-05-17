@@ -67,7 +67,7 @@ Windows 在 cmd 中执行：X 部分替换为你的项目所在目录，设置�
 setx /M PATH "X:\XXX\CyberWaifu\qqbot\ffmpeg\bin;%PATH%"
 ```
 
-#### 记忆数据库向量计算模型
+#### 记忆数据库向量计算模型（使用 Claude 需要）
 为了支持本地的文本向量计算，需要引入 text embedding 模型，这里使用 [Sentence Transformer](https://github.com/UKPLab/sentence-transformers)
 
 首先 [下载模型](https://public.ukp.informatik.tu-darmstadt.de/reimers/sentence-transformers/v0.2/paraphrase-multilingual-MiniLM-L12-v2.zip)，然后解压到根目录的 `st_model` 文件夹，如果不存在请手动创建
