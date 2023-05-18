@@ -122,3 +122,8 @@ PyCqBot: go-cqhttp 警告 当前协议不支持二维码登录, 请配置账号�
 
 ### 使用🎉
 运行 `main.py` 即可
+
+```powershell
+conda activate CyberWaifu
+python main.py
+```
