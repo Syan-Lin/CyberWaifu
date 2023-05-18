@@ -11,7 +11,7 @@ from pycqBot.cqCode import image, record
 def load_config():
     with open(f'./qqbot/bot.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-        return data['group_id_list'], data['user_id_list']
+        return data['user_id_list']
 
 
 def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
@@ -62,10 +62,10 @@ def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
         except Exception as e:
             logging.error(e)
 
-    group, user = load_config()
+    user = load_config()
 
     bot = cqapi.create_bot(
-        group_id_list=group,
+        group_id_list=[0],
         user_id_list=user
     )
     if callback is None:
