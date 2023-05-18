@@ -23,7 +23,10 @@ def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
         if 'CQ' in message.message:
             return
         callback.set_sender(message.sender)
-        waifu.ask(message.message)
+        try:
+            waifu.ask(message.message)
+        except Exception as e:
+            logging.error(e)
 
     def on_private_msg_nonstream(message: Message):
         if 'CQ' in message.message:
@@ -57,7 +60,7 @@ def make_qq_bot(callback, waifu: Waifu, send_text, send_voice, tts):
             time.sleep(0.5)
             waifu.brain.think('/reset 请忘记之前的对话')
         except Exception as e:
-            print(e)
+            logging.error(e)
 
     group, user = load_config()
 
