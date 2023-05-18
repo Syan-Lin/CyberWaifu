@@ -114,3 +114,8 @@ PyCqBot: go-cqhttp 警告 当前协议不支持二维码登录, 请配置账号�
 根据 `presets/charactor/模板.txt` 进行编写，将编写好的人设 Prompt 丢到 `presets/charactor` 目录下即可，随后在 `config.ini` 配置文件中的 `charactor` 字段填写文件名（不包含后缀名）
 
 记忆设定同样是丢到 `presets/charactor` 目录下，多段记忆用空行分开，并在配置文件中填写 `memory` 字段
+
+#### 联网搜索配置
+在 [Google Serper](https://serper.dev/) 中注册并创建一个 API key，在 `config.ini` 中配置并开启即可。Google Serper 可以免费使用 1000 次调用，实测可以使用很久。
+
+由于上下文长度的限制，目前搜索引入的内容并不多，只能获取简单的事实信息。
