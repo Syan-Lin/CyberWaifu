@@ -119,3 +119,6 @@ PyCqBot: go-cqhttp 警告 当前协议不支持二维码登录, 请配置账号�
 在 [Google Serper](https://serper.dev/) 中注册并创建一个 API key，在 `config.ini` 中配置并开启即可。Google Serper 可以免费使用 1000 次调用，实测可以使用很久。
 
 由于上下文长度的限制，目前搜索引入的内容并不多，只能获取简单的事实信息。
+
+### 使用🎉
+运行 `main.py` 即可
