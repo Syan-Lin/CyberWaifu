@@ -3,10 +3,15 @@ from waifu.llm.VectorDB import VectorDB
 from waifu.llm.SentenceTransformer import STEmbedding
 from slack_sdk.web.client import WebClient
 from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatAnthropic
 from slack_sdk.errors import SlackApiError
 from typing import List
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.schema import HumanMessage, SystemMessage, AIMessage, BaseMessage
 import time
+import logging
+
 
 server_token = ''
 
@@ -61,6 +66,74 @@ class SlackClient(WebClient):
                 print(f"Get reply error: {e}")
                 return 'Calude Error'
             time.sleep(0.5)
+
+class ClaudeAPI(Brain):
+    '''Claude Brain, 不支持流式输出及回调'''
+    def __init__(self, anthropic_key: str,
+                 name: str,
+                 stream: bool=True,
+                 callback=None):
+        self.llm = ChatAnthropic(anthropic_api_key=anthropic_key,
+                        streaming=stream,
+                        callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+        self.llm_nonstream = ChatAnthropic(anthropic_api_key=anthropic_key)
+        self.embedding = STEmbedding()
+        self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')
+
+
+    def think(self, messages: List[BaseMessage] | str):
+        '''由于无法同时向 Claude 请求，所以只能以非阻塞方式请求'''
+        content = self.llm(messages).content
+        # logging.info(f'Claude.think:' + '\n'.join(messages))
+        #logging.info(f'Claude.think.content:\n' + content)
+        return content
+        if isinstance(messages, str):
+            self.claude.chat(messages)
+            return self.claude.get_reply_nonstream(self.bot_id)
+        if len(messages) == 0:
+            return ''
+        prompt = ''
+        for mes in messages:
+            if isinstance(mes, HumanMessage):
+                prompt += f'Human: ```\n{mes.content}\n```\n\n'
+            elif isinstance(mes, SystemMessage):
+                prompt += f'System Information: ```\n{mes.content}\n```\n\n'
+            elif isinstance(mes, AIMessage):
+                prompt += f'AI: ```\n{mes.content}\n```\n\n'
+        self.claude.chat(prompt)
+        return self.claude.get_reply_nonstream(self.bot_id)
+
+
+    def think_nonstream(self, messages: List[BaseMessage] | str):
+        '''由于无法同时向 Claude 请求，所以只能以非阻塞方式请求'''
+        return self.llm_nonstream(messages).content
+        if isinstance(messages, str):
+            self.claude.chat(messages)
+            return self.claude.get_reply_nonstream(self.bot_id)
+        if len(messages) == 0:
+            return ''
+        prompt = ''
+        for mes in messages:
+            if isinstance(mes, HumanMessage):
+                prompt += f'Human: ```\n{mes.content}\n```\n\n'
+            elif isinstance(mes, SystemMessage):
+                prompt += f'System Information: ```\n{mes.content}\n```\n\n'
+            elif isinstance(mes, AIMessage):
+                prompt += f'AI: ```\n{mes.content}\n```\n\n'
+        self.claude.chat(prompt)
+        return self.claude.get_reply_nonstream(self.bot_id)
+
+
+    def store_memory(self, text: str | list):
+        '''保存记忆 embedding'''
+        self.vectordb.store(text)
+
+
+    def extract_memory(self, text: str, top_n: int = 10):
+        '''提取 top_n 条相关记忆'''
+        return self.vectordb.query(text, top_n)
+    
+
 
 class Claude(Brain):
     '''Claude Brain, 不支持流式输出及回调'''
@@ -124,3 +197,8 @@ class Claude(Brain):
     def extract_memory(self, text: str, top_n: int = 10):
         '''提取 top_n 条相关记忆'''
         return self.vectordb.query(text, top_n)
+    
+
+
+
+

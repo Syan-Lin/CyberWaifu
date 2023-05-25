@@ -1,7 +1,7 @@
 from waifu.Waifu import Waifu
 from waifu.StreamCallback import WaifuCallback
 from waifu.llm.GPT import GPT
-from waifu.llm.Claude import Claude
+from waifu.llm.Claude import Claude, ClaudeAPI
 from tts.TTS import TTS
 from tts.edge.edge import speak
 from qqbot.qqbot import make_qq_bot
@@ -54,6 +54,11 @@ elif model == 'Claude':
 	user_oauth_token = config['LLM_Claude']['user_oauth_token']
 	bot_id = config['LLM_Claude']['bot_id']
 	brain = Claude(bot_id, user_oauth_token, name)
+elif model == 'ClaudeAPI':
+	callback = None
+	anthropic_key = config['LLM_ClaudeAPI']['anthropic_key']
+	brain = ClaudeAPI(anthropic_key, name)
+
 
 waifu = Waifu(brain=brain,
 				prompt=prompt,
