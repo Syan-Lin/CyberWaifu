@@ -229,17 +229,15 @@ class Waifu():
                 prompt += f'System Information: {mes.content}\n\n'
             elif isinstance(mes, AIMessage):
                 prompt += f'{self.name}: {mes.content}\n\n'
-        prompt_template = f"""System Information:
-Complete the requirements separately
+        prompt_template = f"""Complete the requirements separately
 Conversation:
-
-
-        {prompt}
-
-
-        the requirements:
-       describe what the whole conversation is doing with 10 Chinese keywords. JUST Send the KEYWORDS DIRECTLY:
-       What memories do you think should be important to remember from the conversation? Describe as much as possible in Chinese within 300 tokens, Each action should include the time.INCLUDEING TIME AND DATE. JUST Send the SUMMARIZE DERECTLY:"""
+"""
+{prompt}
+"""
+      The requirements:
+       - Output ONLY in Chinese.
+       - Describe what the whole conversation is doing with 10 Chinese keywords in the first line. JUST send the KEYWORDS DIRECTLY:
+       - What memories do you think should be important to remember from the conversation? Describe as much as possible in Chinese within 300 tokens, Each action should include the time.INCLUDEING TIME AND DATE. JUST send the SUMMARIZE DERECTLY:"""
         print('开始总结')
         summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
         print('结束总结')
