@@ -22,7 +22,8 @@ class Waifu():
                  use_emotion: bool = False,
                  use_emoji: bool = True,
                  use_qqface: bool = False,
-                 use_emoticon: bool = True):
+                 use_emoticon: bool = True, 
+                 max_tokens: int = 4096):
         self.brain = brain
         self.name = name
         self.username = username
@@ -46,6 +47,8 @@ class Waifu():
             self.qqface = waifu.Thoughts.AddQQFace(self.brain)
         if use_emoticon:
             self.emotion = waifu.Thoughts.Emotion(self.brain)
+            
+        self.max_tokens = max_tokens
 
         self.load_memory()
 
@@ -85,9 +88,23 @@ class Waifu():
             relative_memory = relative_memory[:i]
 
         if len(relative_memory) > 0:
-            memory_prompt = f'This following message is relative context for your response:\n\n{str(relative_memory)}'
-            memory_message = SystemMessage(content=memory_prompt)
-            messages.append(memory_message)
+            # 检测加入记忆后token是否超出，如果超出，那么从后往前减少记忆数量
+            user_message_length = self.brain.llm.get_num_tokens_from_messages([message])
+            current_length = self.brain.llm.get_num_tokens_from_messages(messages)
+            exceed_max_tokens = True
+            relative_memory_list  = list(relative_memory)
+            # 预先加入一条空记忆以满足循环条件
+            relative_memory_list.append("")
+            while(exceed_max_tokens):
+                relative_memory_list = relative_memory_list[:-1]
+                memory_prompt = f'This following message is relative context for your response:\n\n{str(relative_memory)}'
+                memory_message = SystemMessage(content=memory_prompt)
+                tokens = self.brain.llm.get_num_tokens_from_messages([memory_message])
+                if(tokens + user_message_length + current_length < self.max_tokens):
+                    exceed_max_tokens = False
+                    messages.append(memory_message)
+                if len(relative_memory_list) == 0:
+                    break
 
             mem_info = ''
             for i in range(len(relative_memory)):

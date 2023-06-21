@@ -54,6 +54,8 @@ elif model == 'Claude':
 	user_oauth_token = config['LLM_Claude']['user_oauth_token']
 	bot_id = config['LLM_Claude']['bot_id']
 	brain = Claude(bot_id, user_oauth_token, name)
+ 
+max_tokens = int(config['LLM']['max_tokens'])
 
 waifu = Waifu(brain=brain,
 				prompt=prompt,
@@ -64,7 +66,8 @@ waifu = Waifu(brain=brain,
 				use_emoji=use_emoji,
 				use_qqface=use_qqface,
                 use_emotion=use_emotion,
-				use_emoticon=use_emoticon)
+				use_emoticon=use_emoticon, 
+    			max_tokens=max_tokens)
 
 # 记忆导入
 filename = config['CyberWaifu']['memory']
