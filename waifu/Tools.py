@@ -17,6 +17,9 @@ def get_first_sentence(text: str):
 
 
 def divede_sentences(text: str) -> List[str]:
+    '''
+    按照标点符号分割句子
+    '''
     sentences = re.findall(r'.*?[~。！？…]+', text)
     if len(sentences) == 0:
         return [text]
@@ -49,29 +52,6 @@ def load_prompt(filename: str):
     except:
         print(colored(f'人设文件: {file_path} 不存在', 'red'))
     return system_prompt
-
-
-def load_emoticon(emoticons: list):
-    data = {'images': []}
-    files = []
-    for i in range(0, len(emoticons), 2):
-        data['images'].append({
-            'file_name': emoticons[i][1],
-            'description': emoticons[i+1][1]
-        })
-        files.append(f'./presets/emoticon/{emoticons[i][1]}')
-    try:
-        with open(f'./presets/emoticon/emoticon.json', 'w',encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False)
-        for file in files:
-            if not os.path.exists(file):
-                raise FileNotFoundError(file)
-        print(colored(f'表情包加载成功！({len(files)} 个表情包文件)', 'green'))
-    except FileNotFoundError as e:
-        print(colored(f'表情包加载失败，图片文件 {e} 不存在！', 'red'))
-    except:
-        print(colored(f'表情包加载失败，请检查配置', 'red'))
-
 
 def load_memory(filename: str, waifuname):
     file_path = f'./presets/charactor/{filename}.txt'

@@ -28,7 +28,6 @@ class SlackClient(WebClient):
             response = self.conversations_open(users=bot_id)
             self.CHANNEL_ID = response["channel"]["id"]
 
-
     def get_reply_nonstream(self, bot_id: str):
         for _ in range(150):
             try:
@@ -40,7 +39,6 @@ class SlackClient(WebClient):
                 print(f"Get reply error: {e}")
                 return 'Calude Error'
             time.sleep(0.5)
-
 
     def get_reply(self, bot_id: str):
         last = ''
@@ -77,7 +75,6 @@ class Claude(Brain):
         self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')
         self.claude.open_channel(self.bot_id)
 
-
     def think(self, messages: List[BaseMessage] | str):
         '''由于无法同时向 Claude 请求，所以只能以非阻塞方式请求'''
         if isinstance(messages, str):
@@ -94,7 +91,7 @@ class Claude(Brain):
             elif isinstance(mes, AIMessage):
                 prompt += f'AI: ```\n{mes.content}\n```\n\n'
         self.claude.chat(prompt)
-        return self.claude.get_reply_nonstream(self.bot_id)
+        return self.claude.get_reply_nonstream(self.bot_id).lstrip(' ')
 
 
     def think_nonstream(self, messages: List[BaseMessage] | str):

@@ -1,13 +1,13 @@
 import json
 import os
 import waifu.Thoughts
-from pycqBot.cqCode import face
-from waifu.Tools import make_message, message_period_to_now
+from waifu.Tools import make_message, message_period_to_now, divede_sentences
 from waifu.llm.Brain import Brain
 from langchain.schema import messages_from_dict, messages_to_dict
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.memory import ChatMessageHistory
-import logging
+import logging,time
+
 
 class Waifu():
     '''CyberWaifu'''
@@ -16,13 +16,7 @@ class Waifu():
                  brain: Brain,
                  prompt: str,
                  name: str,
-                 username: str,
-                 use_search: bool = False,
-                 search_api: str = '',
-                 use_emotion: bool = False,
-                 use_emoji: bool = True,
-                 use_qqface: bool = False,
-                 use_emoticon: bool = True):
+                 username: str):
         self.brain = brain
         self.name = name
         self.username = username
@@ -30,28 +24,20 @@ class Waifu():
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
         self.waifu_reply = ''
+        self.Kaomoji = waifu.Thoughts.AddKaomoji(self.brain,probability=0.3)
 
-        self.use_emoji = use_emoji
-        self.use_emoticon = use_emoticon
-        self.use_search = use_search
-        self.use_qqface = use_qqface
-        self.use_emotion = use_emotion
-        if use_emoji:
-            self.emoji = waifu.Thoughts.AddEmoji(self.brain)
-        if use_emoticon:
-            self.emoticon = waifu.Thoughts.SendEmoticon(self.brain, 0.6)
-        if use_search:
-            self.search = waifu.Thoughts.Search(self.brain, search_api)
-        if use_qqface:
-            self.qqface = waifu.Thoughts.AddQQFace(self.brain)
-        if use_emoticon:
-            self.emotion = waifu.Thoughts.Emotion(self.brain)
-
+        self.logger = logging.getLogger('Waifu')
+        # self.logger.setLevel(logging.DEBUG)
+        console_handler = logging.StreamHandler()
+        # console_handler.setLevel(logging.DEBUG)
+        self.logger.addHandler(console_handler)
+        
         self.load_memory()
-
 
     def ask(self, text: str) -> str:
         '''发送信息'''
+
+        # 检测语句和记忆
         if text == '':
             return ''
         message = make_message(text)
@@ -59,7 +45,7 @@ class Waifu():
         if self.brain.llm.get_num_tokens_from_messages([message]) >= 256:
             raise ValueError('The text is too long!')
         # 第二次检查 历史记录+用户文本 是否过长
-        logging.debug(f'历史记录长度: {self.brain.llm.get_num_tokens_from_messages([message]) + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)}')
+        self.logger.debug(f'历史记录长度: {self.brain.llm.get_num_tokens_from_messages([message]) + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)}')
         if self.brain.llm.get_num_tokens_from_messages([message])\
                 + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 1536:
             self.summarize_memory()
@@ -70,10 +56,15 @@ class Waifu():
 
         messages = [self.charactor_prompt]
 
-        logging.info(f'开始！接收到信息: {text}')
+        self.logger.info(f'开始！接收到信息: {text}')
 
-        # 相关记忆
-        relative_memory, relativeness = self.brain.extract_memory(text)
+        # 相关记忆检测
+        memory = self.brain.extract_memory(text)
+        if memory != ['']:
+            relative_memory, relativeness = memory
+        else:
+            self.logger.warning('人设记忆文件似乎为空，将跳过查询相关记忆')
+            relative_memory, relativeness = ((),())
 
         is_full = False
         total_token = 0
@@ -92,16 +83,7 @@ class Waifu():
             mem_info = ''
             for i in range(len(relative_memory)):
                 mem_info += f'{relative_memory[i]}[相关性: {relativeness[i]}]\n'
-            logging.info(f'查询到相关记忆:\n' + mem_info)
-
-        # 事实搜索
-        if self.use_search:
-            question, answer = self.search.think(text)
-            if not answer == '':
-                logging.info(f'进行搜索:\nQuestion: {question}\nAnswer:{answer}')
-                fact_prompt = f'This following message is relative context searched in Google:\nQuestion:{question}\nAnswer:{answer}'
-                fact_message = SystemMessage(content=fact_prompt)
-                messages.append(fact_message)
+            self.logger.info(f'查询到相关记忆:\n' + mem_info)
 
         # 系统信息
         if len(self.chat_memory.messages) >= 2:
@@ -109,7 +91,7 @@ class Waifu():
             if duration > 1.0:
                 system_message = SystemMessage(content=f'Passed {duration} hours since last conversation. You should simulate what you are doing during this period or make corresponding chat responses based on changes in time.')
                 messages.append(system_message)
-                logging.debug(f'引入系统信息: {system_message.content}')
+                self.logger.debug(f'引入系统信息: {system_message.content}')
 
         # 发送消息
         self.chat_memory.messages.append(message)
@@ -117,8 +99,18 @@ class Waifu():
         messages.extend(self.chat_memory.messages)
         while self.brain.llm.get_num_tokens_from_messages(messages) > 4096:
             self.cut_memory()
-        logging.debug(f'LLM query')
-        reply = self.brain.think(messages)
+        self.logger.debug(f'LLM query')
+        self.reply = self.brain.think(messages)
+
+        old_sentences = divede_sentences(self.reply)
+        sentences = []
+        for st in old_sentences:
+            time.sleep(2)
+            if st == '' or st == ' ':
+                continue
+            st = self.add_kaomoji(st)
+            sentences.append(st)
+        new_reply = ';;'.join(sentences)
 
         history = []
         for message in self.chat_memory.messages:
@@ -127,42 +119,31 @@ class Waifu():
             else:
                 history.append(f'Waifu: {message.content}')
         info = '\n'.join(history)
-        logging.debug(f'上下文记忆:\n{info}')
+        self.logger.debug(f'上下文记忆:\n{info}')
 
         if self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 2048:
             self.summarize_memory()
 
-        logging.info('结束回复')
-        return reply
+        self.logger.info('结束回复')
+        return new_reply
 
 
     def finish_ask(self, text: str) -> str:
+        '''结束对话并保存记忆'''
         if text == '':
             return ''
-        self.chat_memory.add_ai_message(text)
-        self.history.add_ai_message(text)
+        self.chat_memory.add_ai_message(self.reply)
+        self.history.add_ai_message(self.reply)
         self.save_memory()
-        if self.use_emoticon:
-            file = self.emoticon.think(text)
-            if file != '':
-                logging.info(f'发送表情包: {file}')
-            return file
-        else:
-            return ''
+        return ''
 
-
-    def add_emoji(self, text: str) -> str:
-        '''返回添加表情后的句子'''
+    def add_kaomoji(self, text: str) -> str:
+        '''返回添加颜文字后的句子'''
         if text == '':
             return ''
-        if self.use_emoji:
-            emoji = self.emoji.think(text)
-            return text + emoji
-        elif self.use_qqface:
-            id = self.qqface.think(text)
-            if id != -1:
-                return text + str(face(id))
-        return text
+        Kaomoji = self.Kaomoji.think(text)
+        # print('Kaomoji',Kaomoji)
+        return text + Kaomoji
 
 
     def analyze_emotion(self, text: str) -> str:
@@ -207,7 +188,7 @@ class Waifu():
         '''删除一轮对话'''
         for i in range(2):
             first = self.chat_memory.messages.pop(0)
-            logging.debug(f'删除上下文记忆: {first}')
+            self.logger.debug(f'删除上下文记忆: {first}')
 
 
     def save_memory(self):
@@ -242,4 +223,4 @@ class Waifu():
         while len(self.chat_memory.messages) > 4:
             self.cut_memory()
         self.save_memory_dataset(summary)
-        logging.info(f'总结记忆: {summary}')
+        self.logger.info(f'总结记忆: {summary}')
