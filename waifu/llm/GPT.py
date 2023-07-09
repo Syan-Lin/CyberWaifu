@@ -28,11 +28,25 @@ class GPT(Brain):
 
 
     def think(self, messages: List[BaseMessage]):
-        return self.llm(messages).content
+        response = self.llm(messages)
+        if response.content:
+            return response.content
+        else:
+            # 简化信息后再发送
+            simplified_messages = messages[:-1] + [BaseMessage(content="Simplified version of the question", role=messages[-1].role)]
+            response = self.llm(simplified_messages)
+            return response.content if response.content else "Sorry, I couldn't generate a response."
 
 
     def think_nonstream(self, messages: List[BaseMessage]):
-        return self.llm_nonstream(messages).content
+        response = self.llm_nonstream(messages)
+        if response.content:
+            return response.content
+        else:
+            # 简化信息后再发送
+            simplified_messages = messages[:-1] + [BaseMessage(content="Simplified version of the question", role=messages[-1].role)]
+            response = self.llm_nonstream(simplified_messages)
+            return response.content if response.content else "Sorry, I couldn't generate a response."
 
 
     def store_memory(self, text: str | list):
