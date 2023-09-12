@@ -1,13 +1,17 @@
 import json
+import logging
 import os
-import waifu.Thoughts
+from typing import Union
+
+from langchain.memory import ChatMessageHistory
+from langchain.schema import AIMessage, HumanMessage, SystemMessage
+from langchain.schema import messages_from_dict, messages_to_dict
 from pycqBot.cqCode import face
+
+import waifu.Thoughts
 from waifu.Tools import make_message, message_period_to_now
 from waifu.llm.Brain import Brain
-from langchain.schema import messages_from_dict, messages_to_dict
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
-from langchain.memory import ChatMessageHistory
-import logging
+
 
 class Waifu():
     '''CyberWaifu'''
@@ -22,11 +26,14 @@ class Waifu():
                  use_emotion: bool = False,
                  use_emoji: bool = True,
                  use_qqface: bool = False,
-                 use_emoticon: bool = True):
+                 use_emoticon: bool = True,
+                 slack_app_token: str = '',
+                 slack_bot_token:str = ''):
         self.brain = brain
         self.name = name
         self.username = username
-        self.charactor_prompt = SystemMessage(content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n')
+        self.charactor_prompt = SystemMessage(
+            content=f'{prompt}\nYour name is "{name}". Do not response with "{name}: xxx"\nUser name is {username}, you need to call me {username}.\n')
         self.chat_memory = ChatMessageHistory()
         self.history = ChatMessageHistory()
         self.waifu_reply = ''
@@ -36,9 +43,14 @@ class Waifu():
         self.use_search = use_search
         self.use_qqface = use_qqface
         self.use_emotion = use_emotion
+        # self.slack_app_token = slack_app_token
+        # self.slack_bot_token = slack_app_token
+
+
         if use_emoji:
             self.emoji = waifu.Thoughts.AddEmoji(self.brain)
         if use_emoticon:
+            # 0.6：发送图片表情包的概率
             self.emoticon = waifu.Thoughts.SendEmoticon(self.brain, 0.6)
         if use_search:
             self.search = waifu.Thoughts.Search(self.brain, search_api)
@@ -49,7 +61,6 @@ class Waifu():
 
         self.load_memory()
 
-
     def ask(self, text: str) -> str:
         '''发送信息'''
         if text == '':
@@ -59,13 +70,14 @@ class Waifu():
         if self.brain.llm.get_num_tokens_from_messages([message]) >= 256:
             raise ValueError('The text is too long!')
         # 第二次检查 历史记录+用户文本 是否过长
-        logging.debug(f'历史记录长度: {self.brain.llm.get_num_tokens_from_messages([message]) + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)}')
-        if self.brain.llm.get_num_tokens_from_messages([message])\
-                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 1536:
+        logging.debug(
+            f'历史记录长度: {self.brain.llm.get_num_tokens_from_messages([message]) + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)}')
+        if self.brain.llm.get_num_tokens_from_messages([message]) \
+                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages) >= 1536:
             self.summarize_memory()
         # 第三次检查，如果仍然过长，暴力裁切记忆
-        while self.brain.llm.get_num_tokens_from_messages([message])\
-                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 1536:
+        while self.brain.llm.get_num_tokens_from_messages([message]) \
+                + self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages) >= 1536:
             self.cut_memory()
 
         messages = [self.charactor_prompt]
@@ -79,7 +91,7 @@ class Waifu():
         total_token = 0
         for i in range(len(relative_memory)):
             total_token += self.brain.llm.get_num_tokens(relative_memory[i])
-            if(total_token >= 1024):
+            if (total_token >= 1024):
                 is_full = True
         if is_full:
             relative_memory = relative_memory[:i]
@@ -107,7 +119,8 @@ class Waifu():
         if len(self.chat_memory.messages) >= 2:
             duration = message_period_to_now(self.chat_memory.messages[-2])
             if duration > 1.0:
-                system_message = SystemMessage(content=f'Passed {duration} hours since last conversation. You should simulate what you are doing during this period or make corresponding chat responses based on changes in time.')
+                system_message = SystemMessage(
+                    content=f'Passed {duration} hours since last conversation. You should simulate what you are doing during this period or make corresponding chat responses based on changes in time.')
                 messages.append(system_message)
                 logging.debug(f'引入系统信息: {system_message.content}')
 
@@ -129,27 +142,31 @@ class Waifu():
         info = '\n'.join(history)
         logging.debug(f'上下文记忆:\n{info}')
 
-        if self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages)>= 2048:
+        if self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages) >= 2048:
             self.summarize_memory()
 
         logging.info('结束回复')
         return reply
 
-
     def finish_ask(self, text: str) -> str:
+        """
+        完成对话后，把对话内容储存到记忆里面，
+        分了两种格式，对颜文字进行特殊处理
+        同时再对发送的文本进行判断，检测是否添加图片表情包
+        """
         if text == '':
             return ''
         self.chat_memory.add_ai_message(text)
         self.history.add_ai_message(text)
         self.save_memory()
         if self.use_emoticon:
+            # 图片表情包
             file = self.emoticon.think(text)
             if file != '':
                 logging.info(f'发送表情包: {file}')
             return file
         else:
             return ''
-
 
     def add_emoji(self, text: str) -> str:
         '''返回添加表情后的句子'''
@@ -164,7 +181,6 @@ class Waifu():
                 return text + str(face(id))
         return text
 
-
     def analyze_emotion(self, text: str) -> str:
         '''返回情绪分析结果'''
         if text == '':
@@ -173,7 +189,6 @@ class Waifu():
             return self.emotion.think(text)
         return ''
 
-
     def import_memory_dataset(self, text: str):
         '''导入记忆数据库, text 是按换行符分块的长文本'''
         if text == '':
@@ -181,11 +196,9 @@ class Waifu():
         chunks = text.split('\n\n')
         self.brain.store_memory(chunks)
 
-
-    def save_memory_dataset(self, memory: str | list):
+    def save_memory_dataset(self, memory: Union[str, list]):
         '''保存至记忆数据库, memory 可以是文本列表, 也是可以是文本'''
         self.brain.store_memory(memory)
-
 
     def load_memory(self):
         '''读取历史记忆'''
@@ -202,22 +215,19 @@ class Waifu():
         except FileNotFoundError:
             pass
 
-
     def cut_memory(self):
         '''删除一轮对话'''
         for i in range(2):
             first = self.chat_memory.messages.pop(0)
             logging.debug(f'删除上下文记忆: {first}')
 
-
     def save_memory(self):
         '''保存记忆'''
         dicts = messages_to_dict(self.history.messages)
         if not os.path.isdir('./memory'):
             os.makedirs('./memory')
-        with open(f'./memory/{self.name}.json', 'w',encoding='utf-8') as f:
+        with open(f'./memory/{self.name}.json', 'w', encoding='utf-8') as f:
             json.dump(dicts, f, ensure_ascii=False)
-
 
     def summarize_memory(self):
         '''总结 chat_memory 并保存到记忆数据库中'''

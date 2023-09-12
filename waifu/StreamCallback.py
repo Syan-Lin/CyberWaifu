@@ -1,13 +1,16 @@
-from langchain.callbacks.base import BaseCallbackHandler
-from typing import Any, Dict, List, Union
-from langchain.schema import AgentAction, AgentFinish, LLMResult
-from waifu.Tools import get_first_sentence
-from pycqBot.cqCode import image, record
-from waifu.Waifu import Waifu
-from tts.TTS import TTS
+import logging
 import os
 import time
-import logging
+from typing import Any, Dict, List, Union
+
+from langchain.callbacks.base import BaseCallbackHandler
+from langchain.schema import AgentAction, AgentFinish, LLMResult
+from pycqBot.cqCode import image, record
+
+from tts.TTS import TTS
+from waifu.Tools import get_first_sentence
+from waifu.Waifu import Waifu
+
 
 class WaifuCallback(BaseCallbackHandler):
     """Callback handler for streaming. Only works with LLMs that support streaming."""
@@ -25,7 +28,7 @@ class WaifuCallback(BaseCallbackHandler):
         self.sender = sender
 
     def on_llm_start(
-        self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
+            self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any
     ) -> None:
         """Run when LLM starts running."""
         self.text = ''
@@ -75,12 +78,12 @@ class WaifuCallback(BaseCallbackHandler):
             self.sender.send_message("%s" % image(file='file:///' + abs_path))
 
     def on_llm_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
+            self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
         """Run when LLM errors."""
 
     def on_chain_start(
-        self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
+            self, serialized: Dict[str, Any], inputs: Dict[str, Any], **kwargs: Any
     ) -> None:
         """Run when chain starts running."""
 
@@ -88,12 +91,12 @@ class WaifuCallback(BaseCallbackHandler):
         """Run when chain ends running."""
 
     def on_chain_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
+            self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
         """Run when chain errors."""
 
     def on_tool_start(
-        self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
+            self, serialized: Dict[str, Any], input_str: str, **kwargs: Any
     ) -> None:
         """Run when tool starts running."""
 
@@ -105,7 +108,7 @@ class WaifuCallback(BaseCallbackHandler):
         """Run when tool ends running."""
 
     def on_tool_error(
-        self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
+            self, error: Union[Exception, KeyboardInterrupt], **kwargs: Any
     ) -> None:
         """Run when tool errors."""
 

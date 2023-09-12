@@ -13,5 +13,5 @@ TIT = """
                                                                 {__VERSIONS__}  BY Yuan.
 ###############################################################################
 """.format(__VERSIONS__=__VERSIONS__)
-
+# 初始化
 print(colored(TIT, 'green'))

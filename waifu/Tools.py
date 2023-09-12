@@ -1,11 +1,13 @@
-import re
-import os
-import json
 import datetime
+import json
+import os
+import re
 from typing import List
+
 from dateutil.parser import parse
 from langchain.schema import HumanMessage, BaseMessage
 from termcolor import colored
+
 
 def get_first_sentence(text: str):
     sentences = re.findall(r'.*?[~。！？…]+', text)
@@ -17,6 +19,9 @@ def get_first_sentence(text: str):
 
 
 def divede_sentences(text: str) -> List[str]:
+    """
+    将bot的回复进行分割成多段落
+    """
     sentences = re.findall(r'.*?[~。！？…]+', text)
     if len(sentences) == 0:
         return [text]
@@ -51,17 +56,21 @@ def load_prompt(filename: str):
     return system_prompt
 
 
+def load_im(im: str):
+    print(colored("当前bot运行在：{}平台".format(im)))
+
+
 def load_emoticon(emoticons: list):
     data = {'images': []}
     files = []
     for i in range(0, len(emoticons), 2):
         data['images'].append({
             'file_name': emoticons[i][1],
-            'description': emoticons[i+1][1]
+            'description': emoticons[i + 1][1]
         })
         files.append(f'./presets/emoticon/{emoticons[i][1]}')
     try:
-        with open(f'./presets/emoticon/emoticon.json', 'w',encoding='utf-8') as f:
+        with open(f'./presets/emoticon/emoticon.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False)
         for file in files:
             if not os.path.exists(file):

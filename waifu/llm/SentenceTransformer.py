@@ -1,6 +1,7 @@
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer
 
 from termcolor import colored
+
 
 class STEmbedding():
     '''Wraper of Sentence Transformer Eembedding'''
@@ -11,11 +12,9 @@ class STEmbedding():
         except:
             print(colored('Sentence Transformer 模型加载失败！', 'red'))
 
-
     def embed_documents(self, documents: list):
         '''返回嵌入向量'''
         return list(self.model.encode(documents).tolist())
-
 
     def embed_query(self, text: str):
         return self.model.encode(text).tolist()

@@ -1,14 +1,15 @@
-import pandas as pd
-import os
 import ast
+import os
+
+import pandas as pd
 from scipy import spatial
+
 
 class VectorDB:
     def __init__(self, embedding, save_path):
         self.save_path = save_path
         self.embedding = embedding
-        self.chunks    = []
-
+        self.chunks = []
 
     def store(self, text: str | list):
         '''保存 vector'''
@@ -26,11 +27,10 @@ class VectorDB:
             raise TypeError('text must be str or list')
         df.to_csv(self.save_path, mode='a', header=not os.path.exists(self.save_path), index=False)
 
-
     def query(self, text: str, top_n: int, threshold: float = 0.7):
         if text == '':
             return ['']
-        relatedness_fn=lambda x, y: 1 - spatial.distance.cosine(x, y)
+        relatedness_fn = lambda x, y: 1 - spatial.distance.cosine(x, y)
 
         # Load embeddings data
         if not os.path.isfile(self.save_path):
@@ -53,4 +53,4 @@ class VectorDB:
         for i in range(len(relatednesses)):
             if relatednesses[i] < threshold:
                 break
-        return strings[:min(i+1, top_n)], relatednesses[:min(i+1, top_n)]
+        return strings[:min(i + 1, top_n)], relatednesses[:min(i + 1, top_n)]
