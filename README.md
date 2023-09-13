@@ -21,7 +21,7 @@ vits、[edge-tts](https://github.com/rany2/edge-tts)。
 
 - ChatGPT
 - Claude
-<<<<<<< HEAD
+
 
 =======
   
@@ -30,7 +30,7 @@ vits、[edge-tts](https://github.com/rany2/edge-tts)。
 - Slack
   
 注意：slack平台暂时不支持tts功能！
->>>>>>> ed5e64ce70f4701cf4a97ece1f5510dac2b3b122
+
 ### 功能
 
 ✅ 预定义的思考链：使 AI 可以进行一定的逻辑思考，进行决策。例如在文本中添加 Emoji、发送表情包等等。
