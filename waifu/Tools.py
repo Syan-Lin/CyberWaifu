@@ -40,11 +40,9 @@ def message_period_to_now(message: BaseMessage):
     '''返回最后一条消息到现在的小时数'''
     try:
         last_time = json.loads(message.content)['time']
-        print(f"获得消息最后发送时间{last_time}")
         last_time = parse(last_time)
         now_time = parse(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         duration = (now_time - last_time).total_seconds() / 3600
-        print(f"最后一条消息距今{duration}小时")
         return duration
     except :
         return 2
