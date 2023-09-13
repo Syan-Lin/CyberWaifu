@@ -33,7 +33,7 @@ vits、[edge-tts](https://github.com/rany2/edge-tts)。
 
 ### 已知问题🤔
 
-bot运行后，会将bot的回复储存两次至json文件夹内，造成资源浪费~
+bot运行后，会将bot的第一句回复储存两次至json记忆文件内，造成资源浪费~
 
 ### 功能
 
