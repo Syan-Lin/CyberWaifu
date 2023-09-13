@@ -1,7 +1,9 @@
 from typing import Callable
 
+
 class TTS():
     '''TTS Warper'''
+
     def __init__(self, mouth: Callable[[str, str, str], None], voice: str):
         self.mouth = mouth
         self.voice = voice

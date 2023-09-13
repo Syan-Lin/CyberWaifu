@@ -13,17 +13,15 @@
 
 CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实的聊天体验。
 
-该项目使用 [LangChain](https://github.com/hwchase17/langchain) 作为 LLM 主体框架，使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 进行 QQ 机器人部署，TTS 支持 vits、[edge-tts](https://github.com/rany2/edge-tts)。
+该项目使用 [LangChain](https://github.com/hwchase17/langchain) 作为 LLM
+主体框架，使用 [go-cqhttp](https://github.com/Mrs4s/go-cqhttp) 进行 QQ 机器人部署，TTS 支持
+vits、[edge-tts](https://github.com/rany2/edge-tts)。
 
 语言模型支持：
+
 - ChatGPT
 - Claude
-  
-平台支持：
-- QQ
-- Slack
-  
-注意：slack平台暂时不支持tts功能！且不支持群组功能
+
 ### 功能
 
 ✅ 预定义的思考链：使 AI 可以进行一定的逻辑思考，进行决策。例如在文本中添加 Emoji、发送表情包等等。
@@ -53,6 +51,7 @@ CyberWaifu 是一个使用 LLM 和 TTS 实现的聊天机器人，探索真实�
 Python 版本：3.10.10
 
 使用 conda:
+
 ```powershell
 git clone https://github.com/Syan-Lin/CyberWaifu
 cd CyberWaifu
@@ -62,20 +61,28 @@ pip install -r requirements.txt
 ```
 
 #### QQ 机器人部署
-根据 [go-cqhttp 下载文档](https://docs.go-cqhttp.org/guide/quick_start.html#%E4%B8%8B%E8%BD%BD)，下载相应平台的可执行程序，并放入 `qqbot` 目录中
+
+根据 [go-cqhttp 下载文档](https://docs.go-cqhttp.org/guide/quick_start.html#%E4%B8%8B%E8%BD%BD)
+，下载相应平台的可执行程序，并放入 `qqbot` 目录中
 
 #### ffmpeg 安装
-为了支持任意格式的语音发送，按照 go-cqhttp 要求，需要 [下载ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z) 解压到 `qqbot/ffmpeg` 文件夹中（如果不存在请自行创建）
+
+为了支持任意格式的语音发送，按照 go-cqhttp
+要求，需要 [下载ffmpeg](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z) 解压到 `qqbot/ffmpeg` 文件夹中（如果不存在请自行创建）
 
 Windows 在 cmd 中执行：X 部分替换为你的项目所在目录，设置完成后需要重启电脑
+
 ```cmd
 setx /M PATH "X:\XXX\CyberWaifu\qqbot\ffmpeg\bin;%PATH%"
 ```
 
 #### 记忆数据库向量计算模型（使用 Claude 需要）
-为了支持本地的文本向量计算，需要引入 text embedding 模型，这里使用 [Sentence Transformer](https://github.com/UKPLab/sentence-transformers)
 
-首先 [下载模型](https://public.ukp.informatik.tu-darmstadt.de/reimers/sentence-transformers/v0.2/paraphrase-multilingual-MiniLM-L12-v2.zip)，然后解压到根目录的 `st_model` 文件夹，如果不存在请手动创建
+为了支持本地的文本向量计算，需要引入 text embedding
+模型，这里使用 [Sentence Transformer](https://github.com/UKPLab/sentence-transformers)
+
+首先 [下载模型](https://public.ukp.informatik.tu-darmstadt.de/reimers/sentence-transformers/v0.2/paraphrase-multilingual-MiniLM-L12-v2.zip)
+，然后解压到根目录的 `st_model` 文件夹，如果不存在请手动创建
 
 ### 配置✏️
 
@@ -84,10 +91,11 @@ setx /M PATH "X:\XXX\CyberWaifu\qqbot\ffmpeg\bin;%PATH%"
 #### 大语言模型配置
 
 - OpenAI：需要配置 `openai_key`，这部分网上有很多教程，就不赘述了
-- Claude：需要配置 `user_oauth_token` 和 `bot_id`，具体参考 [Claude API 接入教程](https://juejin.cn/post/7230366377705472060)
-
+- Claude：需要配置 `user_oauth_token` 和 `bot_id`
+  ，具体参考 [Claude API 接入教程](https://juejin.cn/post/7230366377705472060)
 
 #### QQ 机器人配置：
+
 运行 `main.py` 提示：
 
 ```
@@ -112,16 +120,21 @@ PyCqBot: go-cqhttp 警告 当前协议不支持二维码登录, 请配置账号�
 ```
 
 #### 人设 Prompt 配置
-根据 `presets/charactor/模板.txt` 进行编写，将编写好的人设 Prompt 丢到 `presets/charactor` 目录下即可，随后在 `config.ini` 配置文件中的 `charactor` 字段填写文件名（不包含后缀名）
+
+根据 `presets/charactor/模板.txt` 进行编写，将编写好的人设 Prompt 丢到 `presets/charactor` 目录下即可，随后在 `config.ini`
+配置文件中的 `charactor` 字段填写文件名（不包含后缀名）
 
 记忆设定同样是丢到 `presets/charactor` 目录下，多段记忆用空行分开，并在配置文件中填写 `memory` 字段
 
 #### 联网搜索配置
-在 [Google Serper](https://serper.dev/) 中注册并创建一个 API key，在 `config.ini` 中配置并开启即可。Google Serper 可以免费使用 1000 次调用，实测可以使用很久。
+
+在 [Google Serper](https://serper.dev/) 中注册并创建一个 API key，在 `config.ini` 中配置并开启即可。Google Serper 可以免费使用
+1000 次调用，实测可以使用很久。
 
 由于上下文长度的限制，目前搜索引入的内容并不多，只能获取简单的事实信息。
 
 ### 使用🎉
+
 运行 `main.py` 即可
 
 ```powershell

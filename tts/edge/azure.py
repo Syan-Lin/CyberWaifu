@@ -1,5 +1,6 @@
 import azure.cognitiveservices.speech as speechsdk
 
+
 def azure_speak(text: str, voice: str, style: str, api: str, region: str):
     ssml = f'''<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="zh-CN">
     <voice name="{voice}"><prosody rate="+7%">

@@ -1,5 +1,4 @@
 import configparser
-
 from qqbot.qqbot import make_qq_bot
 from slackbot.slack_bot import make_slack_bot
 from tts.TTS import TTS
@@ -81,6 +80,7 @@ if filename != '':
 
 if model == 'OpenAI':
     callback.register(waifu)
+    
 if im == "qq":
     make_qq_bot(callback, waifu, send_text, send_voice, tts)
 elif im == "slack":

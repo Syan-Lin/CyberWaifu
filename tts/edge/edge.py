@@ -1,7 +1,9 @@
-import edge_tts
 import asyncio
-import json
 import configparser
+import json
+
+import edge_tts
+
 from tts.edge.azure import azure_speak
 
 config = configparser.ConfigParser()
@@ -12,6 +14,7 @@ region = config['TTS_Edge']['azure_region']
 
 with open(f'./tts/edge/ssml.json', 'r', encoding='utf-8') as f:
     moods = json.load(f)
+
 
 def speak(text: str, voice: str, description: str):
     '''api 为空时调用非 API 版本, role 和 style 会被忽略'''
