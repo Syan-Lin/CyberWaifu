@@ -14,19 +14,19 @@ class GPT(Brain):
                  name: str,
                  stream: bool = False,
                  callback=None,
-                 model: str = 'gpt-3.5-turbo',
-                 proxy: str = ''):
+                 openai_model: str = 'gpt-3.5-turbo',
+                 openai_proxy: str = ''):
         self.llm = ChatOpenAI(openai_api_key=api_key,
-                              model_name=model,
+                              model_name=openai_model,
                               streaming=stream,
                               callbacks=[callback],
                               temperature=0.85)
-        self.llm_nonstream = ChatOpenAI(openai_api_key=api_key, model_name=model)
+        self.llm_nonstream = ChatOpenAI(openai_api_key=api_key, model_name=openai_model)
         self.embedding = OpenAIEmbeddings(openai_api_key=api_key)
         # self.embedding = STEmbedding()
         self.vectordb = VectorDB(self.embedding, f'./memory/{name}.csv')
-        if proxy != '':
-            openai.proxy = proxy
+        if openai_proxy != '':
+            openai.proxy = openai_proxy
 
     def think(self, messages: List[BaseMessage]):
         return self.llm(messages).content

@@ -86,7 +86,6 @@ class Waifu():
 
         # 相关记忆
         relative_memory, relativeness = self.brain.extract_memory(text)
-
         is_full = False
         total_token = 0
         for i in range(len(relative_memory)):
@@ -95,12 +94,10 @@ class Waifu():
                 is_full = True
         if is_full:
             relative_memory = relative_memory[:i]
-
         if len(relative_memory) > 0:
             memory_prompt = f'This following message is relative context for your response:\n\n{str(relative_memory)}'
             memory_message = SystemMessage(content=memory_prompt)
             messages.append(memory_message)
-
             mem_info = ''
             for i in range(len(relative_memory)):
                 mem_info += f'{relative_memory[i]}[相关性: {relativeness[i]}]\n'
@@ -124,9 +121,10 @@ class Waifu():
                 messages.append(system_message)
                 logging.debug(f'引入系统信息: {system_message.content}')
 
-        # 发送消息
+        # 将用户的对话添加进入json记忆文件
         self.chat_memory.messages.append(message)
         self.history.messages.append(message)
+
         messages.extend(self.chat_memory.messages)
         while self.brain.llm.get_num_tokens_from_messages(messages) > 4096:
             self.cut_memory()
@@ -144,7 +142,6 @@ class Waifu():
 
         if self.brain.llm.get_num_tokens_from_messages(self.chat_memory.messages) >= 2048:
             self.summarize_memory()
-
         logging.info('结束回复')
         return reply
 
@@ -154,11 +151,15 @@ class Waifu():
         分了两种格式，对颜文字进行特殊处理
         同时再对发送的文本进行判断，检测是否添加图片表情包
         """
+
         if text == '':
             return ''
         self.chat_memory.add_ai_message(text)
         self.history.add_ai_message(text)
         self.save_memory()
+        a = 1
+        print(a)
+        a+=1
         if self.use_emoticon:
             # 图片表情包
             file = self.emoticon.think(text)
@@ -201,7 +202,7 @@ class Waifu():
         self.brain.store_memory(memory)
 
     def load_memory(self):
-        '''读取历史记忆'''
+        """读取历史记忆"""
         try:
             if not os.path.isdir('./memory'):
                 os.makedirs('./memory')
@@ -227,7 +228,9 @@ class Waifu():
         if not os.path.isdir('./memory'):
             os.makedirs('./memory')
         with open(f'./memory/{self.name}.json', 'w', encoding='utf-8') as f:
+            # 将ai和用户的输入对话写入json记录
             json.dump(dicts, f, ensure_ascii=False)
+            print(f"将ai和用户的输入对话写入json记录:{dicts}")
 
     def summarize_memory(self):
         '''总结 chat_memory 并保存到记忆数据库中'''
@@ -246,9 +249,7 @@ class Waifu():
 
 
         CONCISE SUMMARY IN CHINESE LESS THAN 300 TOKENS:"""
-        print('开始总结')
         summary = self.brain.think_nonstream([SystemMessage(content=prompt_template)])
-        print('结束总结')
         while len(self.chat_memory.messages) > 4:
             self.cut_memory()
         self.save_memory_dataset(summary)
