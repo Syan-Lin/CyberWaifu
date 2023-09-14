@@ -29,6 +29,7 @@ def divede_sentences(text: str) -> List[str]:
 
 
 def make_message(text: str):
+
     data = {
         "msg": text,
         "time": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -45,6 +46,7 @@ def message_period_to_now(message: BaseMessage):
         duration = (now_time - last_time).total_seconds() / 3600
         return duration
     except :
+        print("获取时间失败，尝试重置为上一轮对话时间")
         return 2
 
 
@@ -86,6 +88,7 @@ def load_emoticon(emoticons: list):
 
 
 def load_memory(filename: str, waifuname):
+    '''导入记忆数据库'''
     file_path = f'./presets/charactor/{filename}.txt'
     try:
         with open(file_path, "r", encoding="utf-8") as f:
