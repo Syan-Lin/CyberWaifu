@@ -33,11 +33,15 @@ def make_message(text: str):
 
 def message_period_to_now(message: BaseMessage):
     '''返回最后一条消息到现在的小时数'''
-    last_time = json.loads(message.content)['time']
-    last_time = parse(last_time)
-    now_time = parse(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    duration = (now_time - last_time).total_seconds() / 3600
-    return duration
+    try:
+        last_time = json.loads(message.content)['time']
+        last_time = parse(last_time)
+        now_time = parse(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        duration = (now_time - last_time).total_seconds() / 3600
+        return duration
+    except :
+        print("获取上一次时间失败，重置为1h")
+        return 1
 
 
 def load_prompt(filename: str):
