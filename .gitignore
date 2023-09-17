@@ -1,0 +1,26 @@
+# 临时文件
+__pycache__
+.vscode
+config.yml
+device.json
+session.token
+go-cqhttp.exe
+emoticon.json
+test.py
+output.wav
+ffmpeg
+chatgpt
+
+# 模型文件
+*.pth
+st_model
+
+# 隐私文件
+config.ini
+
+# 日志
+cqLogs
+data
+download
+logs
+memory

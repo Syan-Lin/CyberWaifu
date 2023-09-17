@@ -1,0 +1,47 @@
+[{
+    "name": "zh-CN-XiaoxiaoNeural",
+    "style": [
+        {
+            "name": "affectionate",
+            "description": "表现自己可爱"
+        },{
+            "name": "angry",
+            "description": "生气"
+        },{
+            "name": "cheerful",
+            "description": "高兴兴奋"
+        },{
+            "name": "sad",
+            "description": "难过"
+        },{
+            "name": "chat",
+            "description": "平常聊天"
+        },{
+            "name": "friendly",
+            "description": "温柔"
+        }
+    ]
+},{
+    "name": "zh-CN-XiaoyiNeural",
+    "style": [
+        {
+            "name": "affectionate",
+            "description": "表现自己可爱"
+        },{
+            "name": "angry",
+            "description": "生气"
+        },{
+            "name": "cheerful",
+            "description": "高兴兴奋"
+        },{
+            "name": "embarrassed",
+            "description": "尴尬害羞"
+        },{
+            "name": "sad",
+            "description": "难过"
+        },{
+            "name": "friendly",
+            "description": "温柔"
+        }
+    ]
+}]
