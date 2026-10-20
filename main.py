@@ -26,7 +26,8 @@ use_qqface   = str2bool(config['Thoughts']['use_qqface'])
 use_emoticon = str2bool(config['Thoughts']['use_emoticon'])
 use_search 	 = str2bool(config['Thoughts']['use_search'])
 use_emotion  = str2bool(config['Thoughts']['use_emotion'])
-search_api	 = config['Thoughts_GoogleSerperAPI']['api']
+search_api	 = config.get('Thoughts_GoogleSerperAPI', 'api', fallback='')
+search_provider = config.get('Thoughts', 'search_provider', fallback='auto')
 voice 		 = config['TTS']['voice']
 
 prompt = load_prompt(charactor)
@@ -61,6 +62,7 @@ waifu = Waifu(brain=brain,
                 username=username,
 				use_search=use_search,
 				search_api=search_api,
+				search_provider=search_provider,
 				use_emoji=use_emoji,
 				use_qqface=use_qqface,
                 use_emotion=use_emotion,

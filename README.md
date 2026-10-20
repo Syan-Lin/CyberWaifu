@@ -112,7 +112,18 @@ PyCqBot: go-cqhttp 警告 当前协议不支持二维码登录, 请配置账号�
 记忆设定同样是丢到 `presets/charactor` 目录下，多段记忆用空行分开，并在配置文件中填写 `memory` 字段
 
 #### 联网搜索配置
-在 [Google Serper](https://serper.dev/) 中注册并创建一个 API key，在 `config.ini` 中配置并开启即可。Google Serper 可以免费使用 1000 次调用，实测可以使用很久。
+联网搜索默认关闭。在 `config.ini` 的 `[Thoughts]` 中设置：
+
+```ini
+use_search = True
+search_provider = auto
+```
+
+`auto` 会保留已配置的 [Google Serper](https://serper.dev/)（`[Thoughts_GoogleSerperAPI]` 的 `api` 或环境变量 `SERPER_API_KEY`）。未配置 Serper key 时，使用 [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp) 的免费匿名搜索，无需账号或 API key，搜索使用 Fast 模式。旧配置无需添加 `search_provider`，也按 `auto` 处理。
+
+可将 `search_provider` 设为 `parallel` 显式选择 Parallel，或设为 `serper` 继续使用 Google Serper（需要 key）。显式选择不会因请求失败而切换服务；Parallel 超时、额度用尽或服务不可用时会记录警告，本轮聊天不添加搜索上下文。设置 `use_search = False` 可完全关闭搜索。
+
+Parallel 仅用于关键词搜索，将少量摘要和来源 URL 加入聊天上下文，不会自动抓取网页全文。启用后，生成的搜索关键词会发送至所选服务。Parallel 请求使用每个 Waifu 会话随机生成的 ID，后续搜索复用该 ID；新建 Waifu 实例会生成新 ID。QQ 用户权限仍由 `qqbot/bot.json` 控制，本项目现有的共享聊天会话行为不变。
 
 由于上下文长度的限制，目前搜索引入的内容并不多，只能获取简单的事实信息。
 
