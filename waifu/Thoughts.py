@@ -1,10 +1,13 @@
 import json
 import re
 import random
+import os
+import logging
 import waifu.QQFace
 from langchain.schema import HumanMessage, SystemMessage
 from langchain.utilities import GoogleSerperAPIWrapper
 from waifu.llm.Brain import Brain
+from waifu.ParallelSearch import ParallelSearch, ParallelSearchError
 
 class SendEmoticon():
     '''发送表情包'''
@@ -112,15 +115,26 @@ class AddQQFace():
 
 
 class Search():
-    '''进行谷歌搜索'''
-    def __init__(self, brain: Brain, api: str):
+    '''生成关键词并进行联网搜索'''
+    def __init__(self, brain: Brain, api: str = '', provider: str = 'auto'):
         self.brain = brain
-        self.search = GoogleSerperAPIWrapper(serper_api_key=api, gl='cn', hl='zh-cn', k=20)
+        if provider not in ('auto', 'serper', 'parallel'):
+            raise ValueError('search_provider must be auto, serper or parallel')
+        if provider == 'auto':
+            provider = 'serper' if api or os.environ.get('SERPER_API_KEY') else 'parallel'
+        self.provider = provider
+        self.source_name = 'Google' if provider == 'serper' else 'Parallel'
+        if provider == 'serper':
+            self.search = GoogleSerperAPIWrapper(serper_api_key=api, gl='cn', hl='zh-cn', k=20)
+        else:
+            self.search = ParallelSearch()
         self.check = '''Check the following text if the text needs to be searched. If you think it needs to be searched, response with "yes", otherwise response with "no".'''
-        self.role = '''You are a Chinese search keyword generator now for Google search. You need to generate keywords based on the given text for Google search. Response with a search keywords only within a line, not other sentences.'''
+        self.role = '''You are a Chinese search keyword generator. You need to generate keywords based on the given text for web search. Response with search keywords only within a line, not other sentences.'''
+        if provider == 'serper':
+            self.role = '''You are a Chinese search keyword generator now for Google search. You need to generate keywords based on the given text for Google search. Response with a search keywords only within a line, not other sentences.'''
 
 
-    def think(self, text: str):
+    def think(self, text: str, session_id: str = None):
         if len(text) <= 6:
             return '', ''
         # check = [
@@ -135,9 +149,14 @@ class Search():
             HumanMessage(content=f'Make a Chinese search keyword for the following text:\n"{text}"')
         ]
         question = self.brain.think_nonstream(message)
-        answer = self.search.run(question)
-        if len(answer) >= 256:
-            answer = answer[0:256]
+        if self.provider == 'parallel':
+            try:
+                answer = self.search.run(question, session_id=session_id)
+            except ParallelSearchError as error:
+                logging.warning('Parallel search unavailable: %s', error)
+                return question, ''
+        else:
+            answer = self.search.run(question)[:256]
         return question, answer
 
 
