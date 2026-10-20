@@ -58,10 +58,12 @@ class ScriptedBrain:
 
 
 class Response(io.BytesIO):
-    def __init__(self, payload, content_type='application/json'):
+    def __init__(self, payload, content_type='application/json', session_id=None):
         super().__init__(payload)
         self.headers = Message()
         self.headers['Content-Type'] = content_type
+        if session_id is not None:
+            self.headers['MCP-Session-Id'] = session_id
 
 
 class Wire:
@@ -70,26 +72,33 @@ class Wire:
         self.tool_result = tool_result or {'structuredContent': RESULT}
         self.sse = sse
         self.failure = failure
+        self.transport_sessions = set()
 
     def __call__(self, request, timeout):
         payload = json.loads(request.data)
         self.requests.append((request, timeout, payload))
         method = payload['method']
+        session = request.get_header('Mcp-session-id')
         if method == 'initialize':
+            assert session is None
+            session = str(uuid.uuid4())
+            self.transport_sessions.add(session)
             result = {'protocolVersion': ParallelSearch.PROTOCOL}
-        elif method == 'notifications/initialized':
-            return Response(b'')
-        elif method == 'tools/list':
-            result = {'tools': [{'name': 'web_search'}]}
         else:
-            if self.failure:
-                raise self.failure
-            result = self.tool_result
+            assert session in self.transport_sessions
+            if method == 'notifications/initialized':
+                return Response(b'', session_id=session)
+            elif method == 'tools/list':
+                result = {'tools': [{'name': 'web_search'}]}
+            else:
+                if self.failure:
+                    raise self.failure
+                result = self.tool_result
         reply = {'jsonrpc': '2.0', 'id': payload['id'], 'result': result}
         raw = json.dumps(reply).encode()
         if self.sse:
-            return Response(b': keepalive\n\ndata: ' + raw + b'\n\n', 'text/event-stream')
-        return Response(raw)
+            return Response(b': keepalive\n\ndata: ' + raw + b'\n\n', 'text/event-stream', session)
+        return Response(raw, session_id=session)
 
     @property
     def calls(self):
@@ -124,6 +133,10 @@ class SearchTests(unittest.TestCase):
         self.assertNotIn('from Google', reply)
         self.assertEqual([p['method'] for _, _, p in wire.requests],
                          ['initialize', 'notifications/initialized', 'tools/list', 'tools/call'])
+        self.assertEqual([p.get('id') for _, _, p in wire.requests], [1, None, 2, 3])
+        self.assertEqual(len(wire.transport_sessions), 1)
+        transport_session = next(iter(wire.transport_sessions))
+        self.assertNotEqual(transport_session, bot.search_session_id)
         for request, timeout, payload in wire.requests:
             self.assertEqual(request.full_url, 'https://search.parallel.ai/mcp')
             self.assertEqual(request.get_header('User-agent'), ParallelSearch.USER_AGENT)
@@ -131,6 +144,8 @@ class SearchTests(unittest.TestCase):
             self.assertIn('text/event-stream', request.get_header('Accept'))
             self.assertIsNone(request.get_header('Authorization'))
             self.assertEqual(timeout, 15)
+            if payload['method'] != 'initialize':
+                self.assertEqual(request.get_header('Mcp-session-id'), transport_session)
         self.assertEqual(wire.calls[0]['session_id'], bot.search_session_id)
         self.assertEqual(wire.calls[0]['search_queries'], ['Python 最新 版本 文档'])
         self.assertEqual(wire.calls[0]['objective'], 'Python 最新 版本 文档')
@@ -251,6 +266,11 @@ class SearchTests(unittest.TestCase):
             new_chat = self.waifu(use_search=True)
             new_chat.ask(QUESTION)
         ids = [c['session_id'] for c in wire.calls]
+        # Each operation gets a separate transport session, even on one client.
+        transport_ids = [r.get_header('Mcp-session-id') for r, _, p in wire.requests
+                         if p['method'] == 'tools/call']
+        self.assertEqual(len(set(transport_ids)), 6)
+        self.assertFalse(set(transport_ids).intersection(ids))
         self.assertEqual(ids[:3], [first.search_session_id, second.search_session_id,
                                   first.search_session_id])
         self.assertCountEqual(ids[3:5], [first.search_session_id, second.search_session_id])

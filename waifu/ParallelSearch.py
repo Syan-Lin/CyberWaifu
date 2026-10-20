@@ -1,4 +1,4 @@
-"""Small synchronous client for Parallel's anonymous, stateless HTTP MCP endpoint.
+"""Small synchronous client for Parallel's anonymous HTTP MCP endpoint.
 
 Uses the standard library to keep compatibility with the existing Python 3.10
 and LangChain dependencies. Conversation identity is supplied by Waifu, never
@@ -24,20 +24,24 @@ class ParallelSearch:
     def __init__(self, timeout=15):
         self.timeout = timeout
 
-    def _post(self, method, params, request_id=1):
+    def _post(self, method, params, request_id=1, transport_session=None):
         payload = {'jsonrpc': '2.0', 'method': method, 'params': params}
         if request_id is not None:
             payload['id'] = request_id
-        request = Request(self.URL, data=json.dumps(payload).encode('utf-8'), headers={
+        headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json, text/event-stream',
             'User-Agent': self.USER_AGENT,
             'MCP-Protocol-Version': self.PROTOCOL,
-        })
+        }
+        if transport_session is not None:
+            headers['MCP-Session-Id'] = transport_session
+        request = Request(self.URL, data=json.dumps(payload).encode('utf-8'), headers=headers)
         try:
             with urlopen(request, timeout=self.timeout) as response:
+                response_session = response.headers.get('MCP-Session-Id')
                 if request_id is None:
-                    return None
+                    return None, response_session
                 if response.headers.get_content_type() == 'text/event-stream':
                     reply = self._read_event(response, request_id)
                 else:
@@ -52,7 +56,7 @@ class ParallelSearch:
                 raise ParallelSearchError('MCP request failed')
             if not isinstance(reply.get('result'), dict):
                 raise ParallelSearchError('Invalid MCP result')
-            return reply['result']
+            return reply['result'], response_session
         except (URLError, OSError, HTTPException, ValueError, TypeError) as error:
             raise ParallelSearchError('Parallel search request failed: ' + str(error)) from error
 
@@ -78,24 +82,28 @@ class ParallelSearch:
         raise ParallelSearchError('Missing or oversized MCP event')
 
     def run(self, question, session_id=None):
-        # The endpoint is stateless: initialize each operation rather than cache
-        # mutable transport/session state across concurrent conversations.
-        initialized = self._post('initialize', {
+        # Each operation owns its MCP transport session. This is separate from
+        # the conversation's tool-argument session_id and safe to share clients.
+        initialized, transport_session = self._post('initialize', {
             'protocolVersion': self.PROTOCOL,
             'capabilities': {},
             'clientInfo': {'name': 'CyberWaifu', 'version': '1.0'},
         })
         if initialized.get('protocolVersion') != self.PROTOCOL:
             raise ParallelSearchError('Unsupported MCP protocol version')
-        self._post('notifications/initialized', {}, request_id=None)
-        tools = self._post('tools/list', {}).get('tools', [])
+        self._post('notifications/initialized', {}, request_id=None,
+                   transport_session=transport_session)
+        discovered, _ = self._post('tools/list', {}, request_id=2,
+                                   transport_session=transport_session)
+        tools = discovered.get('tools', [])
         if not isinstance(tools, list) or not any(
                 isinstance(tool, dict) and tool.get('name') == 'web_search' for tool in tools):
             raise ParallelSearchError('MCP web_search tool is unavailable')
         arguments = {'objective': question, 'search_queries': [question]}
         if session_id is not None:
             arguments['session_id'] = session_id
-        result = self._post('tools/call', {'name': 'web_search', 'arguments': arguments})
+        result, _ = self._post('tools/call', {'name': 'web_search', 'arguments': arguments},
+                               request_id=3, transport_session=transport_session)
         if result.get('isError'):
             raise ParallelSearchError('Parallel web_search returned an error')
         data = result.get('structuredContent')
